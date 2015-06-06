@@ -85,12 +85,9 @@ def get_word_by_id(num_id):
     else:
         raise EntityNotFound('id ' + num_id)
 
-def get_random_word(count):
+def get_random_words(count = 1):
     result = []
-    for i in range(count):
-        word_count = get_count()
-        if word_count <= 0:
-            raise EntityNotFound('word count is zero')
-        index = random.randint(1, word_count)
-        result.append(get_word_by_id(index))
+    indexes = random.sample(range(1, get_count()), count)
+    for i in indexes:
+        result.append(get_word_by_id(i))
     return result

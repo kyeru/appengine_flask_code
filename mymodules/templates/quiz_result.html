@@ -1,0 +1,14 @@
+﻿<!doctype html>
+{% if result == True %}
+<p>correct!</p>
+{% else %}
+<p>incorrect!</p>
+{% endif %}
+
+{% if answer %}
+<p>{{ answer }}</p>
+{% endif %}
+
+{% if debug_info %}
+<p>{{ debug_info }}</p>
+{% endif %}
