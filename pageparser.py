@@ -24,7 +24,7 @@ def print_debug(text, line):
     else:
         print text.splitlines()[line - 1]
 
-def get_word_definition(word, max_len=100):
+def fetch_definition(word, max_len=100):
     site = 'http://dictionary.reference.com/browse/'
     text = fetch_page(site + word)
     pattern = 'content="' + word + ' definition, ([^;]*)'
@@ -41,4 +41,4 @@ if __name__ == '__main__':
     """test"""
     words = ['vindictive', 'corroborate', 'dictionary', 'female']
     for word in words:
-        print get_word_definition(word, 100)
+        print fetch_definition(word, 100)
