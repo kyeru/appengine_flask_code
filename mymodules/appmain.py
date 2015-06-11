@@ -1,13 +1,16 @@
 from flask import Flask, url_for, request, render_template
 import cgi
+from os import urandom
 
 from mymodules.fileparser import *
 from mymodules.pageparser import fetch_definition
 from mymodules.wordquiz import QuizGenerator
 from mymodules.wordcounter import *
+from mymodules.ndbi import *
 
 app = Flask(__name__)
 app.Debug = True
+app.secret_key = urandom(24)
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
@@ -53,12 +56,10 @@ def read_random_data():
     except Exception as e:
         return str(e)
 
-quiz = QuizGenerator()
-
 @app.route('/quiz/', methods=['GET', 'POST'])
 def run_quiz():
-    global quiz
     if request.method == 'GET':
+        #session['quiz_seqno'] = get_quiz_seq_num()
         content = get_random_words(4)
         quiz = QuizGenerator(content)
         target, choices = quiz.question()
@@ -71,6 +72,7 @@ def run_quiz():
                                choice3 = choices[2],
                                choice4 = choices[3])
     else:
+        #quiz = QuizGenerator.load_quiz(session['quiz_seqno'])
         user_answer = request.form['choice']
         return render_template('quiz_result.html',
                                result = quiz.evaluate(int(user_answer)),
@@ -84,6 +86,18 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return 'Internal Server Error: ' + str(e)
+
+#
+# unittest
+#
+
+@app.route('/unit/')
+def unittest():
+    try:
+        entry = read_entry(Counter, {'name': 'WordBook'})
+        return str(entry.count)
+    except Exception as e:
+        return str(e)
 
 #
 # Unused: Just for practice

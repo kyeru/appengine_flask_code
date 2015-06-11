@@ -15,6 +15,11 @@ class QuizGenerator:
         else:
             self.answer = random.randint(0, len(entries) - 1) + 1
 
+    @classmethod
+    def load_quiz(seq_num):
+        entrie
+        return QuizGenerator(entries)
+    
     def question(self):
         if len(self.entries) <= 0:
             return '', []
