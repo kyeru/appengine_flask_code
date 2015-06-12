@@ -1,5 +1,16 @@
 import random
 
+from google.appengine.ext import ndb
+from mymodules import ndbi
+from mymodules.counter import *
+
+quiz_seqno = 'QuizSeqNum'
+
+class Answer(ndb.Model):
+    seqno = ndb.IntegerProperty()
+    answer = ndb.IntegerProperty()
+    #indexes = ndb.IntegerProperty(repeated=True)
+
 class QuizException:
     def __init__(self, msg):
         self.message = msg
@@ -7,49 +18,51 @@ class QuizException:
     def __str__(self):
         return self.message
 
-class QuizGenerator:
-    def __init__(self, entries = []):
-        self.entries = entries
-        if len(entries) == 0:
-            self.answer = 0
-        else:
-            self.answer = random.randint(0, len(entries) - 1) + 1
+class QuestionAnswer:
+    def __init__(self, choices, answer):
+        self.choices = choices
+        self.answer = answer
 
-    @classmethod
-    def load_quiz(seq_num):
-        entrie
-        return QuizGenerator(entries)
-    
-    def question(self):
-        if len(self.entries) <= 0:
+    def __str__(self):
+        return str(self.choices) + ' (' + str(self.answer) + ')'
+
+    def evaluate(self, answer):
+        return self.answer == answer
+
+class QuizGenerator:
+    @staticmethod
+    def load(seqno):
+        answer = ndbi.read_entity(Answer, {'seqno': seqno})
+        return QuestionAnswer([], answer.answer)
+
+    @staticmethod
+    def translate(qna, seqno):
+        if len(qna.choices) <= 0:
             return '', []
-        
         choices = []
         try:
-            target, description = self.entries[self.answer - 1]
-            for name, description in self.entries:
+            target, description = qna.choices[qna.answer - 1]
+            for name, description in qna.choices:
                 choices.append(description)
+            answer = Answer(seqno = seqno,
+                            answer = qna.answer)
+            answer.put()
             return target, choices
         except Exception:
-            raise QuizException(str(self.answer) +
-                                '/' +
-                                str(len(self.entries)))
+            raise QuizException('Quiz generation failed: ' + str(qna))
 
-    def question_string(self):
-        target, choices = self.question()
-        question = target + ' --> '
+    @staticmethod
+    def get_log(qna):
+        target, choices = question(qna)
+        log = str(target) + ' --> '
         num = 1
         for choice in choices:
-            question += str(num) + ') ' + choice + ' '
+            log += str(num) + ') ' + choice + ' '
             num += 1
-        question += str(self.answer)
-        return question
+        return log
 
-    def get_answer_num(self):
-        return self.answer
-
-    def evaluate(self, answer_num):
-        return self.answer == answer_num
+def get_quiz_seqno():
+    return increase_counter(quiz_seqno)
 
 # test
 if __name__ == '__main__':
@@ -57,9 +70,7 @@ if __name__ == '__main__':
               ('b', 'description of b'),
               ('c', 'description of c'),
               ('d', 'description of d')]
-    quiz = QuizGenerator(sample)
-    print quiz.question_string()
-    print 'correct answer: ' + str(quiz.get_answer_num())
-    print quiz.evaluate(quiz.get_answer_num())
-    print quiz.evaluate(5 - quiz.get_answer_num())
-    print id(quiz)
+    qna = QuestionAnswer(sample)
+    print 'correct answer: ' + str(qna.answer)
+    print qna.evaluate(qna.answer)
+    print qna.evaluate(5 - qna.answer)

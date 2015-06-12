@@ -1,11 +1,12 @@
-from flask import Flask, url_for, request, render_template
+from flask import Flask, url_for, request, render_template, session
 import cgi
 from os import urandom
 
 from mymodules.fileparser import *
 from mymodules.pageparser import fetch_definition
-from mymodules.wordquiz import QuizGenerator
+from mymodules.wordquiz import *
 from mymodules.wordcounter import *
+from mymodules.counter import *
 from mymodules.ndbi import *
 
 app = Flask(__name__)
@@ -21,6 +22,11 @@ class AppException(Exception):
     
     def __str__(self):
         return self.message
+
+@app.route('/init/')
+def initiate():
+    initiate_counter('QuizSeqNum')
+    return 'Initiated.'
 
 @app.route('/write/<word>/')
 def write_data(word):
@@ -59,24 +65,26 @@ def read_random_data():
 @app.route('/quiz/', methods=['GET', 'POST'])
 def run_quiz():
     if request.method == 'GET':
-        #session['quiz_seqno'] = get_quiz_seq_num()
+        seqno = get_quiz_seqno()
+        session['quiz_seqno'] = seqno
         content = get_random_words(4)
-        quiz = QuizGenerator(content)
-        target, choices = quiz.question()
-        debug_info = str(content) + ' '
-        debug_info += quiz.question_string() + '/' + str(id(quiz))
+        qna = QuestionAnswer(content,
+                             random.randint(0, len(content) - 1) + 1)
+        target, choices = QuizGenerator.translate(qna, seqno)
+        numbered_choices = []
+        for choice in choices:
+            numbered_choices.append({'num': len(numbered_choices) + 1,
+                                     'text': choice})
+        
         return render_template('quiz.html',
                                target = target,
-                               choice1 = choices[0],
-                               choice2 = choices[1],
-                               choice3 = choices[2],
-                               choice4 = choices[3])
+                               choices = numbered_choices)
     else:
-        #quiz = QuizGenerator.load_quiz(session['quiz_seqno'])
+        qna = QuizGenerator.load(session['quiz_seqno'])
         user_answer = request.form['choice']
         return render_template('quiz_result.html',
-                               result = quiz.evaluate(int(user_answer)),
-                               answer = quiz.get_answer_num())
+                               result = qna.evaluate(int(user_answer)),
+                               answer = qna.answer)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -90,12 +98,11 @@ def internal_server_error(e):
 #
 # unittest
 #
-
 @app.route('/unit/')
 def unittest():
     try:
-        entry = read_entry(Counter, {'name': 'WordBook'})
-        return str(entry.count)
+        counter = get_count('WordBook')
+        return str(count)
     except Exception as e:
         return str(e)
 

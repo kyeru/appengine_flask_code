@@ -21,15 +21,15 @@ def make_ndb_condition(model, cond):
         return ndb.AND(attribute == value,
                        make_ndb_condition(model, dict(cond_list[1:])))
 
-def read_entries(model, max_count, cond):
+def read_entities(model, max_count, cond):
     query = type(model).__getattribute__(model, 'query')
     condition = make_ndb_condition(model, cond)
-    entries = list(query(condition).iter())
-    return entries[:max_count]
+    entities = list(query(condition).iter())
+    return entities[:max_count]
 
-def read_entry(model, cond):
-    result = read_entries(model, 1, cond)
+def read_entity(model, cond):
+    result = read_entities(model, 1, cond)
     if len(result) > 0:
         return result[0]
     else:
-        raise NDBIException('entity not found')
+        raise NDBIException('Entity not found.')
