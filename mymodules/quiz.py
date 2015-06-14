@@ -9,7 +9,6 @@ quiz_seqno = 'QuizSeqNum'
 class Answer(ndb.Model):
     seqno = ndb.IntegerProperty()
     answer = ndb.IntegerProperty()
-    #indexes = ndb.IntegerProperty(repeated=True)
 
 class QuizException:
     def __init__(self, msg):

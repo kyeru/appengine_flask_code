@@ -3,11 +3,11 @@ from flask import render_template, session
 import cgi
 from os import urandom
 
+from mymodules.counter import *
 from mymodules.fileparser import *
 from mymodules.pageparser import fetch_definition
-from mymodules.wordquiz import *
+from mymodules.quiz import *
 from mymodules.worddef import *
-from mymodules.counter import *
 
 app = Flask(__name__)
 app.Debug = True
