@@ -39,17 +39,23 @@ class QuizGenerator:
     def translate(qna, seqno):
         if len(qna.choices) <= 0:
             return '', []
-        choices = []
         try:
             target, description = qna.choices[qna.answer - 1]
+            choices = []
             for name, description in qna.choices:
                 choices.append(description)
-            answer = Answer(seqno = seqno,
+            ndbi.add_entity(Answer,
+                            seqno = seqno,
                             answer = qna.answer)
-            answer.put()
             return target, choices
-        except Exception:
-            raise QuizException('Quiz generation failed: ' + str(qna))
+        except Exception as e:
+            raise QuizException(
+                'Quiz generation failed: ' + str(qna) + '\n' +
+                str(type(e)) + ': ' + str(e))
+
+    @staticmethod
+    def cleanup(seqno):
+        ndbi.delete_entity(Answer, seqno = seqno)
 
     @staticmethod
     def get_log(qna):

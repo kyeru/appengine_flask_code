@@ -1,0 +1,9 @@
+﻿<!doctype html>
+{% if message %}
+<p>Error</p>
+<p>{{ message }}</p>
+{% else %}
+<p>Error, but no error message.</p>
+{% endif %}
+
+<a href="{{ next_url }}">return to quiz</a>

@@ -1,5 +1,4 @@
 from google.appengine.ext import ndb
-import cgi
 
 class NDBIException(Exception):
     def __init__(self, message):
@@ -32,4 +31,13 @@ def read_entity(model, cond):
     if len(result) > 0:
         return result[0]
     else:
-        raise NDBIException('Entity not found.')
+        raise NDBIException(
+            'Entity ' + str(model) + ' for ' + str(cond) + ' not found.')
+
+def add_entity(model, **attr):
+    entity = model(**attr)
+    entity.put()
+
+def delete_entity(model, **attr):
+    entity = read_entity(model, dict(**attr))
+    entity.key.delete()

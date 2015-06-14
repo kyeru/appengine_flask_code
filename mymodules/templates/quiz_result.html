@@ -1,8 +1,8 @@
 ﻿<!doctype html>
 {% if result == True %}
-<p>correct!</p>
+<p>Correct!</p>
 {% else %}
-<p>incorrect!</p>
+<p>Incorrect! The right answer is {{ answer }}.</p>
 {% endif %}
 
 {% if answer %}
@@ -12,3 +12,5 @@
 {% if debug_info %}
 <p>{{ debug_info }}</p>
 {% endif %}
+
+<a href="{{ next_url }}">next quiz</a>
