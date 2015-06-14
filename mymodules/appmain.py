@@ -23,6 +23,10 @@ class AppException(Exception):
     def __str__(self):
         return self.message
 
+# style
+def style_url():
+    return url_for('static', filename = 'style.css')
+
 # counter reset
 @app.route('/init/')
 def initiate():
@@ -43,7 +47,9 @@ def write_data(word):
 def upload_file():
     ''' Uploads a quiz input file. '''
     if request.method == 'GET':
-        return render_template('file_upload.html')
+        return render_template(
+            'file_upload.html',
+            style_url = style_url)
     else:
         f = request.files['the_file']
         try:
@@ -66,6 +72,7 @@ def quiz_input():
             numbered_choices.append({'num': len(numbered_choices) + 1,
                                      'text': choice})
         return render_template('quiz.html',
+                               style_url = style_url(),
                                target = target,
                                choices = numbered_choices)
     except Exception:
@@ -79,11 +86,13 @@ def quiz_result():
         qna = QuizGenerator.load(seqno)
         QuizGenerator.cleanup(seqno)
         return render_template('quiz_result.html',
+                               style_url = style_url(),
                                result = qna.evaluate(int(user_answer)),
                                answer = qna.answer,
                                next_url = url_for('quiz_and_result'))
     except Exception as e:
         return render_template('quiz_error.html',
+                               style_url = style_url(),
                                message = str(e),
                                next_url = url_for('quiz_and_result'))
 
@@ -110,6 +119,7 @@ def read_random_data():
     try:
         (word, definition) = get_random_words(1)[0]
         return render_template('word_def.html',
+                               style_url = style_url(),
                                word = word,
                                definition = definition)
     except Exception as e:
