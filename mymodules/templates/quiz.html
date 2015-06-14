@@ -1,4 +1,7 @@
-﻿<!doctype html>
+﻿{% extends "base.html" %}
+
+{% block content %}
+
 {% if target %}
 <p>{{ target }}</p>
 <form method="post">
@@ -18,3 +21,5 @@
 {% if debug_info %}
 <p>{{ debug_info }}</p>
 {% endif %}
+
+{% endblock %}

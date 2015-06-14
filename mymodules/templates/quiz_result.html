@@ -1,4 +1,7 @@
-﻿<!doctype html>
+﻿{% extends "base.html" %}
+
+{% block content %}
+
 {% if result == True %}
 <p>Correct!</p>
 {% else %}
@@ -14,3 +17,5 @@
 {% endif %}
 
 <a href="{{ next_url }}">next quiz</a>
+
+{% endblock %}

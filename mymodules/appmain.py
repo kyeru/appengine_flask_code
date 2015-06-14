@@ -49,7 +49,7 @@ def upload_file():
     if request.method == 'GET':
         return render_template(
             'file_upload.html',
-            style_url = style_url)
+            style_url = style_url())
     else:
         f = request.files['the_file']
         try:
@@ -125,29 +125,14 @@ def read_random_data():
     except Exception as e:
         return str(e)
 
-@app.route('/unit/')
-def unittest():
-    try:
-        counter = get_count('WordBook')
-        return str(count)
-    except Exception as e:
-        return str(e)
-
-#
 # Unused: Just for practice
-#
 def make_stylesheet(path):
     style = '<link rel="stylesheet" type="text/css"'
     style += ' href="' + path + '">'
     return style
 
-def make_link(filename, text):
-    anchor = '<a href="'
-    anchor += url_for('static', filename=filename)
-    anchor += '">' + cgi.escape(text) + '</a>'
-    return anchor
-
 @app.route('/test/')
+@app.route('/test/<something>/')
 def test_page():
     header = '<head>'
     header += make_stylesheet(url_for('static', filename='style.css'))
@@ -157,11 +142,5 @@ def test_page():
     page += '<body>'
     page += '<h1>App engine + Flask test</h1>'
     page += '<p>this is test paragraph</p>'
-    page += make_link('test.html', 'test')
     page += '</body>'
     return page
-
-@app.route('/tmpl/')
-@app.route('/tmpl/<name>/')
-def template_test(name=None):
-    return render_template('hello.html', name=name)

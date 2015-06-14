@@ -1,10 +1,12 @@
-<!doctype html>
-<head>
-  <link rel="stylesheet" type="text/css" href="{{ style_url }}">
-</head>
+{% extends "base.html" %}
+
+{% block content %}
+
 {% if word %}
   <p>word: {{ word }}</p>
   <p>definition: {{ definition }}</p>
 {% else %}
   <p>word is not given</p>
 {% endif %}
+
+{% endblock %}

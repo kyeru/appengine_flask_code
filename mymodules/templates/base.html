@@ -1,0 +1,20 @@
+﻿<!doctype html>
+
+<html>
+
+<head>
+
+{% if style_url %}
+<link rel="stylesheet" type="text/css" href="{{ style_url }}">
+{% endif %}
+
+</head>
+
+<body>
+
+{% block content %}
+{% endblock %}
+
+</body>
+
+</html>

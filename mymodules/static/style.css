@@ -1,23 +1,17 @@
 h1 {
-  font-size: 15pt;
+  font-size: 20pt;
   font-family: Verdana, Helvetica;
   color: #bb6666;
 }
 
 p {
-  font-size: 25pt;
+  font-size: 12pt;
   font-family: sans-serif;
-  color: #000000;
-}
-
-form {
-  font-size: 20pt;
-  font-family: ¸¼Àº°íµñ, Verdana;
-  color: #999999;
+  color: #0000aa;
 }
 
 div {
-  font-size: 14pt;
+  font-size: 12pt;
   font-family: ¸¼Àº°íµñ, Verdana;
   color: #999999;
 }

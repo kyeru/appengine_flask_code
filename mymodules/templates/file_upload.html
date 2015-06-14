@@ -1,4 +1,7 @@
-<!doctype html>
+{% extends "base.html" %}
+
+{% block content %}
+
 <head>
   <link rel="stylesheet" type="text/css" href="{{ style_url }}">
 </head>
@@ -8,3 +11,5 @@
   <div style="float:left;"><input type="file" name="the_file" /></div>
   <div><input type="submit" name="submit" /></div>
 </form>
+
+{% endblock %}

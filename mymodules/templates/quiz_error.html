@@ -1,4 +1,7 @@
-﻿<!doctype html>
+﻿{% extends "base.html" %}
+
+{% block content %}
+
 {% if message %}
 <p>Error</p>
 <p>{{ message }}</p>
@@ -7,3 +10,5 @@
 {% endif %}
 
 <a href="{{ next_url }}">return to quiz</a>
+
+{% endblock %}
