@@ -59,43 +59,8 @@ def upload_file():
             return str(len(result)) + ' words stored'
         except Exception as e:
             return str(e)
+
 # quiz
-def quiz_input():
-    try:
-        seqno = int(request.args.get('seqno', ''))
-        content = get_random_words(4)
-        answer = random.randint(0, len(content) - 1) + 1
-        qna = QuestionAnswer(content, answer)
-        target, choices = QuizGenerator.translate(qna, seqno)
-        numbered_choices = []
-        for choice in choices:
-            numbered_choices.append({'num': len(numbered_choices) + 1,
-                                     'text': choice})
-        return render_template('quiz.html',
-                               style_url = style_url(),
-                               target = target,
-                               choices = numbered_choices)
-    except Exception:
-        return redirect(url_for('quiz_and_result',
-                                seqno = get_quiz_seqno()))
-
-def quiz_result():
-    try:
-        seqno = int(request.args.get('seqno', ''))
-        user_answer = request.form['choice']
-        qna = QuizGenerator.load(seqno)
-        QuizGenerator.cleanup(seqno)
-        return render_template('quiz_result.html',
-                               style_url = style_url(),
-                               result = qna.evaluate(int(user_answer)),
-                               answer = qna.answer,
-                               next_url = url_for('quiz_and_result'))
-    except Exception as e:
-        return render_template('quiz_error.html',
-                               style_url = style_url(),
-                               message = str(e),
-                               next_url = url_for('quiz_and_result'))
-
 @app.route('/quiz/', methods=['GET', 'POST'])
 def quiz_and_result():
     if request.method == 'GET':

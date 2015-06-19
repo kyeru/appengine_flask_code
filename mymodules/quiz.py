@@ -1,15 +1,20 @@
 import random
 
+from flask import url_for, render_template, redirect, request
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
+from mymodules.worddef import *
 
-quiz_seqno = 'QuizSeqNum'
+seq_counter = 'QuizSeqNum'
 
-class Answer(ndb.Model):
+# ndb schema
+class QnARecord(ndb.Model):
     seqno = ndb.IntegerProperty()
     answer = ndb.IntegerProperty()
+    choices = ndb.StringProperty(repeated = True)
 
+# exception
 class QuizException:
     def __init__(self, msg):
         self.message = msg
@@ -31,11 +36,11 @@ class QuestionAnswer:
 class QuizGenerator:
     @staticmethod
     def load(seqno):
-        answer = ndbi.read_entity(Answer, {'seqno': seqno})
-        return QuestionAnswer([], answer.answer)
+        record = ndbi.read_entity(QnARecord, {'seqno': seqno})
+        return QuestionAnswer(record.choices, record.answer)
 
     @staticmethod
-    def translate(qna, seqno):
+    def get_type1(qna, seqno):
         if len(qna.choices) <= 0:
             return '', []
         try:
@@ -43,18 +48,38 @@ class QuizGenerator:
             choices = []
             for name, description in qna.choices:
                 choices.append(description)
-            ndbi.add_entity(Answer,
+            ndbi.add_entity(QnARecord,
                             seqno = seqno,
-                            answer = qna.answer)
+                            answer = qna.answer,
+                            choices = choices)
             return target, choices
         except Exception as e:
             raise QuizException(
-                'Quiz generation failed: ' + str(qna) + '\n' +
+                'Quiz type 1 error: ' + str(qna) + '\n' +
                 str(type(e)) + ': ' + str(e))
 
     @staticmethod
-    def cleanup(seqno):
-        ndbi.delete_entity(Answer, seqno = seqno)
+    def get_type2(qna, seqno):
+        if len(qna.choices) <= 0:
+            return '', []
+        try:
+            name, target = qna.choices[qna.answer - 1]
+            choices = []
+            for name, description in qna.choices:
+                choices.append(name)
+            ndbi.add_entity(QnARecord,
+                            seqno = seqno,
+                            answer = qna.answer,
+                            choices = choices)
+            return target, choices
+        except Exception as e:
+            raise QuizException(
+                'Quiz type 2 error: ' + str(qna) + '\n' +
+                str(type(e)) + ': ' + str(e))
+
+    @staticmethod
+    def delete(seqno):
+        ndbi.delete_entity(QnARecord, seqno = seqno)
 
     @staticmethod
     def get_log(qna):
@@ -67,7 +92,54 @@ class QuizGenerator:
         return log
 
 def get_quiz_seqno():
-    return increase_counter(quiz_seqno)
+    return increase_counter(seq_counter)
+
+# page rendering
+def style_url():
+    return url_for('static', filename = 'style.css')
+
+def quiz_input():
+    try:
+        seqno = request.args.get('seqno')
+        if seqno == None:
+            return redirect(url_for('quiz_and_result',
+                                    seqno = get_quiz_seqno()))
+        content = get_random_words(4)
+        answer = random.randint(0, len(content) - 1) + 1
+        qna = QuestionAnswer(content, answer)
+        quiz_types = [QuizGenerator.get_type1,
+                      QuizGenerator.get_type2]
+        get_type = quiz_types[random.randint(0, 1)]
+        target, choices = get_type(qna, int(seqno))
+        #target, choices = QuizGenerator.get_type1(qna, int(seqno))
+        numbered_choices = []
+        for choice in choices:
+            numbered_choices.append({'num': len(numbered_choices) + 1,
+                                     'text': choice})
+        return render_template('quiz.html',
+                               style_url = style_url(),
+                               target = target,
+                               choices = numbered_choices)
+    except Exception as e:
+        return str(type(e)) + ':' + str(e)
+
+def quiz_result():
+    try:
+        seqno = int(request.args.get('seqno', ''))
+        user_answer = request.form['choice']
+        qna = QuizGenerator.load(seqno)
+        QuizGenerator.delete(seqno)
+        return render_template('quiz_result.html',
+                               style_url = style_url(),
+                               result = qna.evaluate(int(user_answer)),
+                               answer = qna.answer,
+                               choices = qna.choices,
+                               next_url = url_for('quiz_and_result'))
+    except Exception as e:
+        return render_template('error.html',
+                               style_url = style_url(),
+                               message = str(e),
+                               next_url = url_for('quiz_and_result'))
 
 # test
 if __name__ == '__main__':
