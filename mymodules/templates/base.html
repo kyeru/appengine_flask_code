@@ -1,8 +1,10 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 
 <html>
 
 <head>
+
+<meta charset="UTF-8">
 
 {% if style_url %}
 <link rel="stylesheet" type="text/css" href="{{ style_url }}">
@@ -11,6 +13,14 @@
 </head>
 
 <body>
+
+<div class="nav">
+  <ul class="hlist">
+    <li><a href="../quiz"><b>quiz</b></a></li>
+    <li><a href="../random"><b>random</b></a></li>
+    <li><a href="../upload"><b>upload</b></a></li>
+  </ul>
+</div>
 
 {% block content %}
 {% endblock %}

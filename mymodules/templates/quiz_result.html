@@ -1,15 +1,21 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
 {% if result == True %}
-<p>Correct!</p>
+<p>Number {{ answer}} is correct.</p>
+<ol>
+{% for choice in choices %}
+  <li>{{ choice }}</li>
+{% endfor %}
+</ol>
 {% else %}
-<p>Incorrect! The right answer is {{ answer }}.</p>
-{% endif %}
-
-{% if answer %}
-<p>{{ answer }}</p>
+<p>Incorrect. The right answer is {{ answer }}.</p>
+<ol>
+{% for choice in choices %}
+  <li>{{ choice }}</li>
+{% endfor %}
+</ol>
 {% endif %}
 
 {% if debug_info %}
