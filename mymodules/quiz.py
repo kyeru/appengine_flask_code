@@ -1,9 +1,9 @@
 import random
 
-from flask import url_for, render_template, redirect, request
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
+from mymodules.rendercommon import *
 from mymodules.worddef import *
 
 seq_counter = 'QuizSeqNum'
@@ -95,9 +95,6 @@ def get_quiz_seqno():
     return increase_counter(seq_counter)
 
 # page rendering
-def style_url():
-    return url_for('static', filename = 'style.css')
-
 def quiz_input():
     try:
         seqno = request.args.get('seqno')
@@ -121,7 +118,7 @@ def quiz_input():
                                target = target,
                                choices = numbered_choices)
     except Exception as e:
-        return str(type(e)) + ':' + str(e)
+        return error_page(str(e), 'quiz_and_result')
 
 def quiz_result():
     try:
@@ -136,10 +133,7 @@ def quiz_result():
                                choices = qna.choices,
                                next_url = url_for('quiz_and_result'))
     except Exception as e:
-        return render_template('error.html',
-                               style_url = style_url(),
-                               message = str(e),
-                               next_url = url_for('quiz_and_result'))
+        return error_page(str(e), 'quiz_and_result')
 
 # test
 if __name__ == '__main__':

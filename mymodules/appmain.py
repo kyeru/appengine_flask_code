@@ -23,15 +23,17 @@ class AppException(Exception):
     def __str__(self):
         return self.message
 
-# style
-def style_url():
-    return url_for('static', filename = 'style.css')
-
 # counter reset
 @app.route('/init/')
 def initiate():
     initiate_counter('QuizSeqNum')
     return 'Initiated.'
+
+# empty page (default)
+@app.route('/')
+def default_page():
+    return render_template('base.html',
+                           style_url = style_url())
 
 # entity upload
 @app.route('/write/<word>/')
@@ -72,11 +74,14 @@ def quiz_and_result():
 @app.errorhandler(404)
 def page_not_found(e):
     """Return a custom 404 error."""
-    return 'Sorry, nothing at this URL.', 404
+    return error_page('Sorry, nothing at this URL', 'default_page')
+    #return 'Sorry, nothing at this URL.', 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return 'Internal Server Error: ' + str(e)
+    return error_page('Internal Server Error: ' + str(e),
+                      'default_page')
+    #return 'Internal Server Error: ' + str(e)
 
 # test
 @app.route('/random/')
@@ -90,20 +95,10 @@ def read_random_data():
     except Exception as e:
         return str(e)
 
-# Unused: Just for practice
-def make_stylesheet(path):
-    style = '<link rel="stylesheet" type="text/css"'
-    style += ' href="' + path + '">'
-    return style
-
+# unused (for practice)
 @app.route('/test/')
 @app.route('/test/<something>/')
 def test_page():
-    header = '<head>'
-    header += make_stylesheet(url_for('static', filename='style.css'))
-    header += '</head>'
-
-    page = header
     page += '<body>'
     page += '<h1>App engine + Flask test</h1>'
     page += '<p>this is test paragraph</p>'
