@@ -4,8 +4,7 @@ import cgi
 from os import urandom
 
 from mymodules.counter import *
-from mymodules.fileparser import *
-from mymodules.pageparser import fetch_definition
+# from mymodules.fileparser import *
 from mymodules.quiz import *
 from mymodules.worddef import *
 
@@ -21,7 +20,7 @@ class AppException(Exception):
         self.message = msg
     
     def __str__(self):
-        return self.message
+        return 'main: ' + self.message
 
 # counter reset
 @app.route('/init/')
@@ -35,40 +34,27 @@ def default_page():
     return render_template('base.html',
                            style_url = style_url())
 
-# entity upload
-@app.route('/write/<word>/')
-def write_data(word):
-    ''' Adds a single word definition to the datastore '''
-    try:
-        add_worddef(word, fetch_definition(word))
-        return word + ' is stored'
-    except Exception as e:
-        return str(e)
-    
+# data feeding by file
 @app.route('/upload/', methods=['GET', 'POST'])
 def upload_file():
-    ''' Uploads a quiz input file. '''
     if request.method == 'GET':
-        return render_template(
-            'file_upload.html',
-            style_url = style_url())
+        return quiz_file_upload()
     else:
-        f = request.files['the_file']
-        try:
-            result = parse_file(f)
-            for (word, definition) in result:
-                add_worddef(word, definition)
-            return str(len(result)) + ' words stored'
-        except Exception as e:
-            return str(e)
+        return quiz_file_upload_result()
+
+# login
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    return 'login'
 
 # quiz
 @app.route('/quiz/', methods=['GET', 'POST'])
-def quiz_and_result():
+@app.route('/quiz/<user>/', methods=['GET', 'POST'])
+def quiz_and_result(user = None):
     if request.method == 'GET':
-        return quiz_input()
+        return quiz_input(user)
     else:
-        return quiz_result()
+        return quiz_result(user)
 
 # error handler
 @app.errorhandler(404)

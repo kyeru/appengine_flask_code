@@ -11,7 +11,7 @@ class WordDefException(Exception):
         self.message = message
 
     def __str__(self):
-        return self.message
+        return 'worddef: ' + self.message
 
 class WordDef(ndb.Model):
     num_id = ndb.IntegerProperty()

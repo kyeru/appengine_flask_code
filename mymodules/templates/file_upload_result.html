@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if store_count %}
+<p>{{ store_count }} words stored.</p>
+{% else %}
+<p>no word stored.</p>
+{% endif %}
+{% if ignore_count %}
+<p>{{ ignore_count }} words ignored.</p>
+{% endif %}
+
+{% endblock %}

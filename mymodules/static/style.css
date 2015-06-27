@@ -29,13 +29,13 @@ div {
 }
 
 .nav {
-  font-size: 1.1em;
-  background-color: #cccccc;
+  font-size: 1.2em;
+  background-color: rgba(58, 128, 195, 0.72);
 }
 
 .hlist li {
   display: inline;
-  margin-right: 1.5em;
+  margin-right: 2.0em;
 }
 
 a:link, a:visited {

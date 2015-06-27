@@ -7,9 +7,9 @@ class NDBIException(Exception):
     def __str__(self):
         return self.message
 
-def make_ndb_condition(model, cond):
+def make_ndb_filter(model, cond):
     if len(cond) == 0:
-        raise NDBIException('condition is empty')
+        raise NDBIException('filter condition is empty')
 
     cond_list = list(cond.iteritems())
     attr, value = cond_list[0]
@@ -18,11 +18,11 @@ def make_ndb_condition(model, cond):
         return ndb.AND(attribute == value)
     else:
         return ndb.AND(attribute == value,
-                       make_ndb_condition(model, dict(cond_list[1:])))
+                       make_ndb_filter(model, dict(cond_list[1:])))
 
 def read_entities(model, max_count, cond):
     query = type(model).__getattribute__(model, 'query')
-    condition = make_ndb_condition(model, cond)
+    condition = make_ndb_filter(model, cond)
     entities = list(query(condition).iter())
     return entities[:max_count]
 

@@ -1,8 +1,10 @@
 import random
 
+from flask import request
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
+from mymodules.fileparser import parse_file
 from mymodules.rendercommon import *
 from mymodules.worddef import *
 
@@ -20,7 +22,7 @@ class QuizException:
         self.message = msg
 
     def __str__(self):
-        return self.message
+        return 'quiz: ' + self.message
 
 class QuestionAnswer:
     def __init__(self, choices, answer):
@@ -95,32 +97,34 @@ def get_quiz_seqno():
     return increase_counter(seq_counter)
 
 # page rendering
-def quiz_input():
+def quiz_input(user = None):
     try:
         seqno = request.args.get('seqno')
         if seqno == None:
             return redirect(url_for('quiz_and_result',
-                                    seqno = get_quiz_seqno()))
+                                    seqno = get_quiz_seqno(),
+                                    user = user))
         content = get_random_words(4)
         answer = random.randint(0, len(content) - 1) + 1
         qna = QuestionAnswer(content, answer)
         quiz_types = [QuizGenerator.get_type1,
                       QuizGenerator.get_type2]
         get_type = quiz_types[random.randint(0, 1)]
-        target, choices = get_type(qna, int(seqno))
-        #target, choices = QuizGenerator.get_type1(qna, int(seqno))
+        #target, choices = get_type(qna, int(seqno))
+        target, choices = QuizGenerator.get_type1(qna, int(seqno))
         numbered_choices = []
         for choice in choices:
             numbered_choices.append({'num': len(numbered_choices) + 1,
                                      'text': choice})
         return render_template('quiz.html',
                                style_url = style_url(),
+                               user = user,
                                target = target,
                                choices = numbered_choices)
     except Exception as e:
-        return error_page(str(e), 'quiz_and_result')
+        return error_page(str(e), 'quiz_and_result', user = user)
 
-def quiz_result():
+def quiz_result(user = None):
     try:
         seqno = int(request.args.get('seqno', ''))
         user_answer = request.form['choice']
@@ -128,14 +132,40 @@ def quiz_result():
         QuizGenerator.delete(seqno)
         return render_template('quiz_result.html',
                                style_url = style_url(),
+                               user = user,
                                result = qna.evaluate(int(user_answer)),
                                answer = qna.answer,
                                choices = qna.choices,
-                               next_url = url_for('quiz_and_result'))
+                               next_url = url_for('quiz_and_result',
+                                                  user = user))
     except Exception as e:
-        return error_page(str(e), 'quiz_and_result')
+        return error_page(str(e), 'quiz_and_result', user = user)
 
-# test
+def quiz_file_upload():
+    return render_template('file_upload.html',
+                           style_url = style_url())
+
+def quiz_file_upload_result():
+    try:
+        worddefs = parse_file(request.files['uploaded'])
+        store_count = 0
+        ignore_count = 0
+        for (word, definition) in worddefs:
+            try:
+                add_worddef(word, definition)
+                store_count += 1
+            except WordDefException:
+                ignore_count += 1
+                continue
+        return render_template('file_upload_result.html',
+                               style_url = style_url(),
+                               store_count = store_count,
+                               ignore_count = ignore_count)
+    except Exception as e:
+        return error_page('quiz_file_upload_result():\n' + str(e),
+                          'upload_file')
+        
+# unit test
 if __name__ == '__main__':
     sample = [('a', 'description of a'),
               ('b', 'description of b'),
