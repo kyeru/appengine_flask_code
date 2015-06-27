@@ -1,9 +1,10 @@
 from flask import Flask, request, session
 from os import urandom
 
-from mymodules.quiz import *
-from mymodules.rendercommon import *
-from mymodules.worddef import *
+from mymodules import quiz
+from mymodules import rendercommon
+from mymodules import usersession
+from mymodules import worddef
 
 app = Flask(__name__)
 app.Debug = True
@@ -22,47 +23,49 @@ class AppException(Exception):
 # default empty page
 @app.route('/')
 def default_page():
-    return default_page()
+    return rendercommon.default_page()
 
 # login
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    return 'login'
+    return usersession.login_page()
 
 # quiz data upload
 @app.route('/upload/', methods=['GET', 'POST'])
+@app.route('/upload/<user>/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
-        return quiz_file_upload()
+        return quiz.quiz_file_upload()
     else:
-        return quiz_file_upload_result()
+        return quiz.quiz_file_upload_result()
 
 # quiz
 @app.route('/quiz/', methods=['GET', 'POST'])
 @app.route('/quiz/<user>/', methods=['GET', 'POST'])
 def quiz_and_result(user = None):
     if request.method == 'GET':
-        return quiz_input(user)
+        return quiz.quiz_input(user)
     else:
-        return quiz_result(user)
+        return quiz.quiz_result(user)
 
 # error handler
 @app.errorhandler(404)
 def page_not_found(e):
     """Return a custom 404 error."""
-    return error_page('Sorry, nothing at this URL', 'default_page')
+    return rendercommon.error_page(
+        'Sorry, nothing at this URL', 'default_page')
     #return 'Sorry, nothing at this URL.', 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return error_page('Internal Server Error: ' + str(e),
-                      'default_page')
+    return rendercommon.error_page(
+        'Internal Server Error: ' + str(e), 'default_page')
     #return 'Internal Server Error: ' + str(e)
 
 # test
 @app.route('/random/')
 def read_random_data():
-    return random_word()
+    return worddef.random_word()
 
 # unused
 @app.route('/test/')

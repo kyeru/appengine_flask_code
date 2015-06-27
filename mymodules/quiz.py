@@ -4,7 +4,7 @@ from flask import request
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
-from mymodules.fileparser import parse_file
+# from mymodules.fileparser import parse_file
 from mymodules.rendercommon import *
 from mymodules.worddef import *
 
@@ -93,6 +93,18 @@ class QuizGenerator:
 
 def get_quiz_no():
     return random.randint(1, 65535)
+
+def parse_file(f):
+    word_defs = []
+    line_num = 0
+    for entry in f.read().strip().split('\n'):
+        line_num += 1
+        word_def = entry.split('\t')
+        if len(word_def) < 2:
+            raise QuizException(
+                'parse_file(): line %d invalid format' % line_num)
+        word_defs.append((str(word_def[0]), str(word_def[1])))
+    return word_defs
 
 # page rendering
 def quiz_input(user = None):
