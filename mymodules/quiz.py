@@ -8,8 +8,6 @@ from mymodules.fileparser import parse_file
 from mymodules.rendercommon import *
 from mymodules.worddef import *
 
-seq_counter = 'QuizSeqNum'
-
 # ndb schema
 class QnARecord(ndb.Model):
     quiz_no = ndb.IntegerProperty()
@@ -95,7 +93,6 @@ class QuizGenerator:
 
 def get_quiz_no():
     return random.randint(1, 65535)
-    # return increase_counter(seq_counter)
 
 # page rendering
 def quiz_input(user = None):

@@ -1,9 +1,6 @@
-from flask import Flask, url_for, redirect, request
-from flask import render_template, session
-import cgi
+from flask import Flask, request, session
 from os import urandom
 
-from mymodules.counter import *
 from mymodules.quiz import *
 from mymodules.rendercommon import *
 from mymodules.worddef import *
@@ -22,16 +19,15 @@ class AppException(Exception):
     def __str__(self):
         return 'main: ' + self.message
 
-# counter reset
-@app.route('/init/')
-def initiate():
-    initiate_counter('QuizSeqNum')
-    return 'Initiated.'
-
 # default empty page
 @app.route('/')
 def default_page():
     return default_page()
+
+# login
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    return 'login'
 
 # quiz data upload
 @app.route('/upload/', methods=['GET', 'POST'])
@@ -40,11 +36,6 @@ def upload_file():
         return quiz_file_upload()
     else:
         return quiz_file_upload_result()
-
-# login
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    return 'login'
 
 # quiz
 @app.route('/quiz/', methods=['GET', 'POST'])
@@ -73,7 +64,7 @@ def internal_server_error(e):
 def read_random_data():
     return random_word()
 
-# unused (for practice)
+# unused
 @app.route('/test/')
 @app.route('/test/<something>/')
 def test_page():
