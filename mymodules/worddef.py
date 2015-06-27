@@ -3,6 +3,7 @@ import random
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
+from mymodules.rendercommon import *
 
 group_name = 'WordDef'
 
@@ -44,3 +45,17 @@ def add_worddef(word, definition):
                     num_id = word_count,
                     word = word,
                     definition = definition)
+
+# page rendering
+def random_word():
+    try:
+        (word, definition) = get_random_words(1)[0]
+        return render_template('word_def.html',
+                               style_url = style_url(),
+                               word = word,
+                               definition = definition)
+    except Exception as e:
+        return error_page('random_word(): ' + str(e),
+                          'read_random_word')
+
+        

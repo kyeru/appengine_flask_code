@@ -12,7 +12,7 @@ seq_counter = 'QuizSeqNum'
 
 # ndb schema
 class QnARecord(ndb.Model):
-    seqno = ndb.IntegerProperty()
+    quiz_no = ndb.IntegerProperty()
     answer = ndb.IntegerProperty()
     choices = ndb.StringProperty(repeated = True)
 
@@ -37,12 +37,12 @@ class QuestionAnswer:
 
 class QuizGenerator:
     @staticmethod
-    def load(seqno):
-        record = ndbi.read_entity(QnARecord, {'seqno': seqno})
+    def load(quiz_no):
+        record = ndbi.read_entity(QnARecord, {'quiz_no': quiz_no})
         return QuestionAnswer(record.choices, record.answer)
 
     @staticmethod
-    def get_type1(qna, seqno):
+    def get_type1(qna, quiz_no):
         if len(qna.choices) <= 0:
             return '', []
         try:
@@ -51,7 +51,7 @@ class QuizGenerator:
             for name, description in qna.choices:
                 choices.append(description)
             ndbi.add_entity(QnARecord,
-                            seqno = seqno,
+                            quiz_no = quiz_no,
                             answer = qna.answer,
                             choices = choices)
             return target, choices
@@ -61,7 +61,7 @@ class QuizGenerator:
                 str(type(e)) + ': ' + str(e))
 
     @staticmethod
-    def get_type2(qna, seqno):
+    def get_type2(qna, quiz_no):
         if len(qna.choices) <= 0:
             return '', []
         try:
@@ -70,7 +70,7 @@ class QuizGenerator:
             for name, description in qna.choices:
                 choices.append(name)
             ndbi.add_entity(QnARecord,
-                            seqno = seqno,
+                            quiz_no = quiz_no,
                             answer = qna.answer,
                             choices = choices)
             return target, choices
@@ -80,8 +80,8 @@ class QuizGenerator:
                 str(type(e)) + ': ' + str(e))
 
     @staticmethod
-    def delete(seqno):
-        ndbi.delete_entity(QnARecord, seqno = seqno)
+    def delete(quiz_no):
+        ndbi.delete_entity(QnARecord, quiz_no = quiz_no)
 
     @staticmethod
     def get_log(qna):
@@ -93,16 +93,17 @@ class QuizGenerator:
             num += 1
         return log
 
-def get_quiz_seqno():
-    return increase_counter(seq_counter)
+def get_quiz_no():
+    return random.randint(1, 65535)
+    # return increase_counter(seq_counter)
 
 # page rendering
 def quiz_input(user = None):
     try:
-        seqno = request.args.get('seqno')
-        if seqno == None:
+        quiz_no = request.args.get('no')
+        if quiz_no == None:
             return redirect(url_for('quiz_and_result',
-                                    seqno = get_quiz_seqno(),
+                                    no = get_quiz_no(),
                                     user = user))
         content = get_random_words(4)
         answer = random.randint(0, len(content) - 1) + 1
@@ -110,8 +111,8 @@ def quiz_input(user = None):
         quiz_types = [QuizGenerator.get_type1,
                       QuizGenerator.get_type2]
         get_type = quiz_types[random.randint(0, 1)]
-        #target, choices = get_type(qna, int(seqno))
-        target, choices = QuizGenerator.get_type1(qna, int(seqno))
+        #target, choices = get_type(qna, int(quiz_no))
+        target, choices = QuizGenerator.get_type1(qna, int(quiz_no))
         numbered_choices = []
         for choice in choices:
             numbered_choices.append({'num': len(numbered_choices) + 1,
@@ -126,10 +127,10 @@ def quiz_input(user = None):
 
 def quiz_result(user = None):
     try:
-        seqno = int(request.args.get('seqno', ''))
+        quiz_no = int(request.args.get('no', ''))
         user_answer = request.form['choice']
-        qna = QuizGenerator.load(seqno)
-        QuizGenerator.delete(seqno)
+        qna = QuizGenerator.load(quiz_no)
+        QuizGenerator.delete(quiz_no)
         return render_template('quiz_result.html',
                                style_url = style_url(),
                                user = user,
@@ -162,7 +163,7 @@ def quiz_file_upload_result():
                                store_count = store_count,
                                ignore_count = ignore_count)
     except Exception as e:
-        return error_page('quiz_file_upload_result():\n' + str(e),
+        return error_page('quiz_file_upload_result(): ' + str(e),
                           'upload_file')
         
 # unit test

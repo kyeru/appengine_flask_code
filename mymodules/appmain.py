@@ -4,8 +4,8 @@ import cgi
 from os import urandom
 
 from mymodules.counter import *
-# from mymodules.fileparser import *
 from mymodules.quiz import *
+from mymodules.rendercommon import *
 from mymodules.worddef import *
 
 app = Flask(__name__)
@@ -28,13 +28,12 @@ def initiate():
     initiate_counter('QuizSeqNum')
     return 'Initiated.'
 
-# empty page (default)
+# default empty page
 @app.route('/')
 def default_page():
-    return render_template('base.html',
-                           style_url = style_url())
+    return default_page()
 
-# data feeding by file
+# quiz data upload
 @app.route('/upload/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
@@ -72,14 +71,7 @@ def internal_server_error(e):
 # test
 @app.route('/random/')
 def read_random_data():
-    try:
-        (word, definition) = get_random_words(1)[0]
-        return render_template('word_def.html',
-                               style_url = style_url(),
-                               word = word,
-                               definition = definition)
-    except Exception as e:
-        return str(e)
+    return random_word()
 
 # unused (for practice)
 @app.route('/test/')
