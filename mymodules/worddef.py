@@ -50,12 +50,9 @@ def add_worddef(word, definition):
 def random_word():
     try:
         (word, definition) = get_random_words(1)[0]
-        return render_template('word_def.html',
-                               style_url = style_url(),
-                               word = word,
-                               definition = definition)
+        return render_page('word_def.html',
+                           word = word,
+                           definition = definition)
     except Exception as e:
         return error_page('random_word(): ' + str(e),
                           'read_random_word')
-
-        

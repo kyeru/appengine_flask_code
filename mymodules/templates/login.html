@@ -4,16 +4,10 @@
 
 <title>Login</title>
 
-{% if method_get %}
 <form method="post" enctype="multipart/form-data">
   <div style="float:left;clear:left;margin-right:10px;">ID: </div>
   <div><input type="text" name="user_id" /></div>
-  <div><input type="submit" name="submit" /></div>
+  <div><input type="submit" name="submit" style="float:left;"/></div>
 </form>
-{% endif %}
-
-{% if method_post %}
-<p>{{ user_id }} logged in.</p>
-{% endif %}
 
 {% endblock %}

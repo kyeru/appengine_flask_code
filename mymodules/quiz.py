@@ -4,7 +4,6 @@ from flask import request
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules.counter import *
-# from mymodules.fileparser import parse_file
 from mymodules.rendercommon import *
 from mymodules.worddef import *
 
@@ -107,13 +106,12 @@ def parse_file(f):
     return word_defs
 
 # page rendering
-def quiz_input(user = None):
+def quiz_input():
     try:
         quiz_no = request.args.get('no')
         if quiz_no == None:
             return redirect(url_for('quiz_and_result',
-                                    no = get_quiz_no(),
-                                    user = user))
+                                    no = get_quiz_no()))
         content = get_random_words(4)
         answer = random.randint(0, len(content) - 1) + 1
         qna = QuestionAnswer(content, answer)
@@ -126,34 +124,28 @@ def quiz_input(user = None):
         for choice in choices:
             numbered_choices.append({'num': len(numbered_choices) + 1,
                                      'text': choice})
-        return render_template('quiz.html',
-                               style_url = style_url(),
-                               user = user,
-                               target = target,
-                               choices = numbered_choices)
+        return render_page('quiz.html',
+                           target = target,
+                           choices = numbered_choices)
     except Exception as e:
-        return error_page(str(e), 'quiz_and_result', user = user)
+        return error_page(str(e), 'quiz_and_result')
 
-def quiz_result(user = None):
+def quiz_result():
     try:
         quiz_no = int(request.args.get('no', ''))
         user_answer = request.form['choice']
         qna = QuizGenerator.load(quiz_no)
         QuizGenerator.delete(quiz_no)
-        return render_template('quiz_result.html',
-                               style_url = style_url(),
-                               user = user,
-                               result = qna.evaluate(int(user_answer)),
-                               answer = qna.answer,
-                               choices = qna.choices,
-                               next_url = url_for('quiz_and_result',
-                                                  user = user))
+        return render_page('quiz_result.html',
+                           result = qna.evaluate(int(user_answer)),
+                           answer = qna.answer,
+                           choices = qna.choices,
+                           next_url = url_for('quiz_and_result'))
     except Exception as e:
         return error_page(str(e), 'quiz_and_result', user = user)
 
 def quiz_file_upload():
-    return render_template('file_upload.html',
-                           style_url = style_url())
+    return render_page('file_upload.html')
 
 def quiz_file_upload_result():
     try:
@@ -167,10 +159,9 @@ def quiz_file_upload_result():
             except WordDefException:
                 ignore_count += 1
                 continue
-        return render_template('file_upload_result.html',
-                               style_url = style_url(),
-                               store_count = store_count,
-                               ignore_count = ignore_count)
+        return render_page('file_upload_result.html',
+                           store_count = store_count,
+                           ignore_count = ignore_count)
     except Exception as e:
         return error_page('quiz_file_upload_result(): ' + str(e),
                           'upload_file')

@@ -30,9 +30,13 @@ def default_page():
 def login():
     return usersession.login_page()
 
+# logout
+@app.route('/logout/')
+def logout():
+    return usersession.logout_page()
+
 # quiz data upload
 @app.route('/upload/', methods=['GET', 'POST'])
-@app.route('/upload/<user>/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
         return quiz.quiz_file_upload()
@@ -41,12 +45,11 @@ def upload_file():
 
 # quiz
 @app.route('/quiz/', methods=['GET', 'POST'])
-@app.route('/quiz/<user>/', methods=['GET', 'POST'])
-def quiz_and_result(user = None):
+def quiz_and_result():
     if request.method == 'GET':
-        return quiz.quiz_input(user)
+        return quiz.quiz_input()
     else:
-        return quiz.quiz_result(user)
+        return quiz.quiz_result()
 
 # error handler
 @app.errorhandler(404)

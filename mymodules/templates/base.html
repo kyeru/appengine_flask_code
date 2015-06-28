@@ -16,20 +16,35 @@
 
 <div class="nav">
   <ul class="hlist">
+    {% if not user_id %}
     <li><a href="/login"><b>login</b></a></li>
+    {% else %}
+    <li><a href="/logout"><b>logout</b></a></li>
+    {% endif %}
     <li><a href="/quiz"><b>quiz</b></a></li>
     <li><a href="/random"><b>random</b></a></li>
     <li><a href="/upload"><b>upload</b></a></li>
   </ul>
 </div>
 
+
 {% block content %}
 {% endblock %}
 
 <br/>
 
-{% if user %}
-<div class="footer">username: {{ user }}</div>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <p>{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<br/>
+
+{% if user_id %}
+<div class="footer">{{ user_id }} logged in</div>
 {% endif %}
 
 </body>
