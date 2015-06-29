@@ -3,11 +3,14 @@ import random
 from flask import request
 from google.appengine.ext import ndb
 from mymodules import ndbi
+from mymodules import renderer
 from mymodules.counter import *
-from mymodules.rendercommon import *
 from mymodules.worddef import *
 
 # ndb schema
+class QuizEntry(ndb.Model):
+    pass
+
 class QnARecord(ndb.Model):
     quiz_no = ndb.IntegerProperty()
     answer = ndb.IntegerProperty()
@@ -124,11 +127,11 @@ def quiz_input():
         for choice in choices:
             numbered_choices.append({'num': len(numbered_choices) + 1,
                                      'text': choice})
-        return render_page('quiz.html',
-                           target = target,
-                           choices = numbered_choices)
+        return renderer.render_page('quiz.html',
+                                    target = target,
+                                    choices = numbered_choices)
     except Exception as e:
-        return error_page(str(e), 'quiz_and_result')
+        return renderer.error_page(str(e), 'quiz_and_result')
 
 def quiz_result():
     try:
@@ -136,16 +139,16 @@ def quiz_result():
         user_answer = request.form['choice']
         qna = QuizGenerator.load(quiz_no)
         QuizGenerator.delete(quiz_no)
-        return render_page('quiz_result.html',
-                           result = qna.evaluate(int(user_answer)),
-                           answer = qna.answer,
-                           choices = qna.choices,
-                           next_url = url_for('quiz_and_result'))
+        return renderer.render_page('quiz_result.html',
+                                    result = qna.evaluate(int(user_answer)),
+                                    answer = qna.answer,
+                                    choices = qna.choices,
+                                    next_url = url_for('quiz_and_result'))
     except Exception as e:
-        return error_page(str(e), 'quiz_and_result', user = user)
+        return renderer.error_page(str(e), 'quiz_and_result')
 
 def quiz_file_upload():
-    return render_page('file_upload.html')
+    return renderer.render_page('file_upload.html')
 
 def quiz_file_upload_result():
     try:
@@ -159,12 +162,12 @@ def quiz_file_upload_result():
             except WordDefException:
                 ignore_count += 1
                 continue
-        return render_page('file_upload_result.html',
-                           store_count = store_count,
-                           ignore_count = ignore_count)
+        return renderer.render_page('file_upload_result.html',
+                                    store_count = store_count,
+                                    ignore_count = ignore_count)
     except Exception as e:
-        return error_page('quiz_file_upload_result(): ' + str(e),
-                          'upload_file')
+        return renderer.error_page('quiz_file_upload_result(): ' + str(e),
+                                   'upload_file')
         
 # unit test
 if __name__ == '__main__':

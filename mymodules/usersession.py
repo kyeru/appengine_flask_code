@@ -1,10 +1,9 @@
 from flask import flash, request, session
 from google.appengine.ext import ndb
-from mymodules.rendercommon import *
+from mymodules import renderer
 
 class User(ndb.Model):
     user_id = ndb.StringProperty()
-    nickname = ndb.StringProperty()
     password = ndb.StringProperty()
 
 class LoginException(Exception):
@@ -15,9 +14,15 @@ class LoginException(Exception):
         return 'login: ' + self.message
 
 # page rendering
+def signin():
+    if request.method == 'GET':
+        return renderer.under_construction()
+    else:
+        return renderer.under_construction()
+
 def login_page():
     if request.method == 'GET':
-        return render_page('login.html')
+        return renderer.render_page('login.html')
     else:
         user_id = request.form['user_id']
         session['user_id'] = user_id

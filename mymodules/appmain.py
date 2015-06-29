@@ -2,7 +2,7 @@ from flask import Flask, request, session
 from os import urandom
 
 from mymodules import quiz
-from mymodules import rendercommon
+from mymodules import renderer
 from mymodules import usersession
 from mymodules import worddef
 
@@ -22,8 +22,13 @@ class AppException(Exception):
 
 # default empty page
 @app.route('/')
-def default_page():
-    return rendercommon.default_page()
+def default():
+    return renderer.default_page()
+
+# signin
+@app.route('/signin/', methods = ['GET', 'POST'])
+def signin():
+    return renderer.under_construction()
 
 # login
 @app.route('/login/', methods=['GET', 'POST'])
@@ -55,13 +60,13 @@ def quiz_and_result():
 @app.errorhandler(404)
 def page_not_found(e):
     """Return a custom 404 error."""
-    return rendercommon.error_page(
+    return renderer.error_page(
         'Sorry, nothing at this URL', 'default_page')
     #return 'Sorry, nothing at this URL.', 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return rendercommon.error_page(
+    return renderer.error_page(
         'Internal Server Error: ' + str(e), 'default_page')
     #return 'Internal Server Error: ' + str(e)
 

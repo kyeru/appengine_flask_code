@@ -25,3 +25,8 @@ def error_page(message, return_to, **args):
     return render_page('error.html',
                        message = message,
                        next_url = url_for(return_to, **args))
+
+def under_construction():
+    return render_page('error.html',
+                       message = 'Under Construction'
+                       next_url = url_for('default_page'))
