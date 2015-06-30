@@ -1,6 +1,6 @@
 import random
 
-from flask import request
+from flask import redirect, request, url_for
 from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules import renderer

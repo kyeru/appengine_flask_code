@@ -1,6 +1,6 @@
-from flask import Flask, request, session
 from os import urandom
 
+from flask import Flask, request, session
 from mymodules import quiz
 from mymodules import renderer
 from mymodules import usersession
@@ -61,13 +61,13 @@ def quiz_and_result():
 def page_not_found(e):
     """Return a custom 404 error."""
     return renderer.error_page(
-        'Sorry, nothing at this URL', 'default_page')
+        'Sorry, nothing at this URL', 'default')
     #return 'Sorry, nothing at this URL.', 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
     return renderer.error_page(
-        'Internal Server Error: ' + str(e), 'default_page')
+        'Internal Server Error: ' + str(e), 'default')
     #return 'Internal Server Error: ' + str(e)
 
 # test

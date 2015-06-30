@@ -1,10 +1,7 @@
-from flask import flash, request, session
+from flask import flash, redirect, request, session, url_for
 from google.appengine.ext import ndb
 from mymodules import renderer
-
-class User(ndb.Model):
-    user_id = ndb.StringProperty()
-    password = ndb.StringProperty()
+from mymodules.user import *
 
 class LoginException(Exception):
     def __init__(self, msg):
@@ -27,11 +24,11 @@ def login_page():
         user_id = request.form['user_id']
         session['user_id'] = user_id
         flash('welcome %s.' % user_id)
-        return redirect(url_for('default_page'))
+        return redirect(url_for('default'))
 
 def logout_page():
     user_id = get_user_id()
     if user_id != None:
         flash('bye, %s.' % user_id)
         session.pop('user_id')
-    return redirect(url_for('default_page'))
+    return redirect(url_for('default'))
