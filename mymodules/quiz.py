@@ -5,6 +5,7 @@ from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
+from mymodules.user import *
 from mymodules.worddef import *
 
 # ndb schema
@@ -38,7 +39,9 @@ class QuestionAnswer:
 class QuizGenerator:
     @staticmethod
     def load(quiz_no):
-        record = ndbi.read_entity(QnARecord, {'quiz_no': quiz_no})
+        record = ndbi.read_entity_p(QnARecord,
+                                    current_user(),
+                                    {'quiz_no': quiz_no})
         return QuestionAnswer(record.choices, record.answer)
 
     @staticmethod
@@ -51,6 +54,7 @@ class QuizGenerator:
             for name, description in qna.choices:
                 choices.append(description)
             ndbi.add_entity(QnARecord,
+                            parent = current_user(),
                             quiz_no = quiz_no,
                             answer = qna.answer,
                             choices = choices)
@@ -70,6 +74,7 @@ class QuizGenerator:
             for name, description in qna.choices:
                 choices.append(name)
             ndbi.add_entity(QnARecord,
+                            parent = current_user(),
                             quiz_no = quiz_no,
                             answer = qna.answer,
                             choices = choices)
@@ -81,7 +86,9 @@ class QuizGenerator:
 
     @staticmethod
     def delete(quiz_no):
-        ndbi.delete_entity(QnARecord, quiz_no = quiz_no)
+        ndbi.delete_entity_p(QnARecord,
+                             current_user(),
+                             quiz_no = quiz_no)
 
     @staticmethod
     def get_log(qna):

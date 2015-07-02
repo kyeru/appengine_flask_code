@@ -10,6 +10,9 @@ class LoginException(Exception):
     def __str__(self):
         return 'login: ' + self.message
 
+def issafe(user_id):
+    return user_id.isalnum()
+
 # page rendering
 def signin():
     if request.method == 'GET':
@@ -21,9 +24,14 @@ def login_page():
     if request.method == 'GET':
         return renderer.render_page('login.html')
     else:
-        user_id = request.form['user_id']
-        session['user_id'] = user_id
-        flash('welcome %s.' % user_id)
+        user_id = request.form['user_id'].strip()
+        if issafe(user_id):
+            if not user_exists(user_id):
+                add_user(user_id)
+            session['user_id'] = user_id
+            flash('welcome %s.' % user_id)
+        else:
+            flash('invalid user name %s.' % user_id)
         return redirect(url_for('default'))
 
 def logout_page():

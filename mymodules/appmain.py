@@ -23,6 +23,7 @@ class AppException(Exception):
 # default empty page
 @app.route('/')
 def default():
+    session['user_id'] = 'abcd'
     return renderer.default_page()
 
 # signin
@@ -43,6 +44,7 @@ def logout():
 # quiz data upload
 @app.route('/upload/', methods=['GET', 'POST'])
 def upload_file():
+    session['user_id'] = 'abcd'
     if request.method == 'GET':
         return quiz.quiz_file_upload()
     else:
@@ -51,6 +53,7 @@ def upload_file():
 # quiz
 @app.route('/quiz/', methods=['GET', 'POST'])
 def quiz_and_result():
+    session['user_id'] = 'abcd'
     if request.method == 'GET':
         return quiz.quiz_input()
     else:

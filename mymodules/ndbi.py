@@ -41,3 +41,21 @@ def add_entity(model, **attr):
 def delete_entity(model, **attr):
     entity = read_entity(model, dict(**attr))
     entity.key.delete()
+
+def read_entities_p(model, max_count, user, cond):
+    query = type(model).__getattribute__(model, 'query')
+    condition = make_ndb_filter(model, cond)
+    entities = list(query(condition, ancestor = user).iter())
+    return entities[:max_count]
+
+def read_entity_p(model, user, cond):
+    result = read_entities_p(model, 1, user, cond)
+    if len(result) > 0:
+        return result[0]
+    else:
+        raise NDBIException(
+            'Entity ' + str(model) + ' for ' + str(cond) + ' not found.')
+
+def delete_entity_p(model, user, **attr):
+    entity = read_entity_p(model, user, dict(**attr))
+    entity.key.delete()
