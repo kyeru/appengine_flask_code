@@ -1,6 +1,8 @@
 from flask import flash, redirect, request, session, url_for
 from google.appengine.ext import ndb
+
 from mymodules import renderer
+from mymodules.counter import *
 from mymodules.user import *
 
 class LoginException(Exception):
@@ -8,10 +10,14 @@ class LoginException(Exception):
         self.message = msg
     
     def __str__(self):
-        return 'login: ' + self.message
+        return 'LoginException(' + self.message + ')'
 
 def issafe(user_id):
     return user_id.isalnum()
+
+def initiate_user_record(user_id):
+    add_user(user_id)
+    initiate_counter(current_user(), 'WordDef')
 
 # page rendering
 def signin():
@@ -27,7 +33,7 @@ def login_page():
         user_id = request.form['user_id'].strip()
         if issafe(user_id):
             if not user_exists(user_id):
-                add_user(user_id)
+                initiate_user_record(user_id)
             session['user_id'] = user_id
             flash('welcome %s.' % user_id)
         else:

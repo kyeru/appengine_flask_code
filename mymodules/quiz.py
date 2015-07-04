@@ -2,6 +2,7 @@ import random
 
 from flask import redirect, request, url_for
 from google.appengine.ext import ndb
+
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
@@ -23,7 +24,7 @@ class QuizException:
         self.message = msg
 
     def __str__(self):
-        return 'quiz: ' + self.message
+        return 'QuizException(' + self.message + ')'
 
 class QuestionAnswer:
     def __init__(self, choices, answer):
@@ -39,9 +40,9 @@ class QuestionAnswer:
 class QuizGenerator:
     @staticmethod
     def load(quiz_no):
-        record = ndbi.read_entity_p(QnARecord,
-                                    current_user(),
-                                    {'quiz_no': quiz_no})
+        record = ndbi.read_entity(QnARecord,
+                                  ancestor = current_user(),
+                                  quiz_no = quiz_no)
         return QuestionAnswer(record.choices, record.answer)
 
     @staticmethod
@@ -86,9 +87,9 @@ class QuizGenerator:
 
     @staticmethod
     def delete(quiz_no):
-        ndbi.delete_entity_p(QnARecord,
-                             current_user(),
-                             quiz_no = quiz_no)
+        ndbi.delete_entity(QnARecord,
+                           ancestor = current_user(),
+                           quiz_no = quiz_no)
 
     @staticmethod
     def get_log(qna):

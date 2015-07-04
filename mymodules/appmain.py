@@ -1,6 +1,7 @@
 from os import urandom
 
 from flask import Flask, request, session
+
 from mymodules import quiz
 from mymodules import renderer
 from mymodules import usersession
@@ -18,12 +19,11 @@ class AppException(Exception):
         self.message = msg
     
     def __str__(self):
-        return 'main: ' + self.message
+        return 'AppException(' + self.message + ')'
 
 # default empty page
 @app.route('/')
 def default():
-    session['user_id'] = 'abcd'
     return renderer.default_page()
 
 # signin
@@ -32,7 +32,7 @@ def signin():
     return renderer.under_construction()
 
 # login
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/login/', methods = ['GET', 'POST'])
 def login():
     return usersession.login_page()
 
@@ -42,18 +42,16 @@ def logout():
     return usersession.logout_page()
 
 # quiz data upload
-@app.route('/upload/', methods=['GET', 'POST'])
+@app.route('/upload/', methods = ['GET', 'POST'])
 def upload_file():
-    session['user_id'] = 'abcd'
     if request.method == 'GET':
         return quiz.quiz_file_upload()
     else:
         return quiz.quiz_file_upload_result()
 
 # quiz
-@app.route('/quiz/', methods=['GET', 'POST'])
+@app.route('/quiz/', methods = ['GET', 'POST'])
 def quiz_and_result():
-    session['user_id'] = 'abcd'
     if request.method == 'GET':
         return quiz.quiz_input()
     else:
@@ -75,7 +73,7 @@ def internal_server_error(e):
 
 # test
 @app.route('/random/')
-def read_random_data():
+def read_random_word():
     return worddef.random_word()
 
 # unused

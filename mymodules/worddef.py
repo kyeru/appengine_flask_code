@@ -1,9 +1,11 @@
 import random
 
 from google.appengine.ext import ndb
+
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
+from mymodules.user import *
 
 group_name = 'WordDef'
 
@@ -20,15 +22,20 @@ class WordDef(ndb.Model):
     definition = ndb.StringProperty()
 
 def get_definition(word):
-    entity = ndbi.read_entity(WordDef, {'word': word})
+    entity = ndbi.read_entity(WordDef,
+                              ancestor = current_user(),
+                              word = word)
     return entity.definition
 
 def get_worddef_by_id(num_id):
-    entity = ndbi.read_entity(WordDef, {'num_id': num_id})
+    entity = ndbi.read_entity(WordDef,
+                              ancestor = current_user(),
+                              num_id = num_id)
     return (entity.word, entity.definition)
 
 def get_random_words(count = 1):
-    indexes = random.sample(range(1, get_count(group_name)), count)
+    indexes = random.sample(
+        range(1, get_count(current_user(), group_name)), count)
     return [get_worddef_by_id(i) for i in indexes]
 
 def add_worddef(word, definition):
@@ -40,8 +47,9 @@ def add_worddef(word, definition):
     else:
         raise WordDefException('duplicate write for ' + word)
 
-    word_count = increase_counter(group_name)
+    word_count = increase_counter(current_user(), group_name)
     ndbi.add_entity(WordDef,
+                    parent = current_user(),
                     num_id = word_count,
                     word = word,
                     definition = definition)

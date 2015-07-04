@@ -5,57 +5,46 @@ class NDBIException(Exception):
         self.message = message
         
     def __str__(self):
-        return self.message
+        return 'NDBIException(' + self.message + ')'
 
-def make_ndb_filter(model, cond):
-    if len(cond) == 0:
-        raise NDBIException('filter condition is empty')
+def make_ndb_filter(model, props):
+    if len(props) == 0:
+        raise NDBIException('filter property is empty')
 
-    cond_list = list(cond.iteritems())
-    attr, value = cond_list[0]
+    prop_list = list(props.iteritems())
+    attr, value = prop_list[0]
     attribute = type(model).__getattribute__(model, attr)
-    if len(cond) == 1:
+    if len(props) == 1:
         return ndb.AND(attribute == value)
     else:
         return ndb.AND(attribute == value,
-                       make_ndb_filter(model, dict(cond_list[1:])))
+                       make_ndb_filter(model, dict(prop_list[1:])))
 
-def read_entities(model, max_count, cond):
+def read_entities(model, max_count, **props):
     query = type(model).__getattribute__(model, 'query')
-    condition = make_ndb_filter(model, cond)
-    entities = list(query(condition).iter())
-    return entities[:max_count]
+    if props.has_key('ancestor'):
+        ancestor_key = props['ancestor']
+        props.pop('ancestor')
+        ndb_filter = make_ndb_filter(model, dict(props))
+        entities = list(query(ndb_filter, ancestor = ancestor_key).iter())
+        return entities[:max_count]
+    else:
+        ndb_filter = make_ndb_filter(model, dict(props))
+        entities = list(query(ndb_filter).iter())
+        return entities[:max_count]
 
-def read_entity(model, cond):
-    result = read_entities(model, 1, cond)
+def read_entity(model, **props):
+    result = read_entities(model, 1, **props)
     if len(result) > 0:
         return result[0]
     else:
         raise NDBIException(
-            'Entity ' + str(model) + ' for ' + str(cond) + ' not found.')
+            'Entity ' + str(model) + ' for ' + str(props) + ' not found.')
 
-def add_entity(model, **attr):
-    entity = model(**attr)
+def add_entity(model, **props):
+    entity = model(**props)
     entity.put()
 
-def delete_entity(model, **attr):
-    entity = read_entity(model, dict(**attr))
-    entity.key.delete()
-
-def read_entities_p(model, max_count, user, cond):
-    query = type(model).__getattribute__(model, 'query')
-    condition = make_ndb_filter(model, cond)
-    entities = list(query(condition, ancestor = user).iter())
-    return entities[:max_count]
-
-def read_entity_p(model, user, cond):
-    result = read_entities_p(model, 1, user, cond)
-    if len(result) > 0:
-        return result[0]
-    else:
-        raise NDBIException(
-            'Entity ' + str(model) + ' for ' + str(cond) + ' not found.')
-
-def delete_entity_p(model, user, **attr):
-    entity = read_entity_p(model, user, dict(**attr))
+def delete_entity(model, **props):
+    entity = read_entity(model, **props)
     entity.key.delete()

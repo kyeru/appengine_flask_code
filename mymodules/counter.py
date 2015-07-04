@@ -1,4 +1,5 @@
 from google.appengine.ext import ndb
+
 from mymodules import ndbi
 
 class Counter(ndb.Model):
@@ -10,24 +11,28 @@ class CounterException(Exception):
         self.message = message
 
     def __str__(self):
-        return self.message
+        return 'CounterException(' + self.message +')'
 
-def initiate_counter(name):
+def initiate_counter(user, name):
     try:
-        counter = ndbi.read_entity(Counter, {'name': name})
+        counter = ndbi.read_entity(
+            Counter, ancestor = user, name = name)
         counter.count = 0
         counter.put()
     except ndbi.NDBIException:
-        counter = Counter(name = name,
-                          count = 0)
-        counter.put()
+        ndbi.add_entity(Counter,
+                        parent = user,
+                        name = name,
+                        count = 0)
 
-def get_count(name):
-    counter = ndbi.read_entity(Counter, {'name': name})
+def get_count(user, name):
+    counter = ndbi.read_entity(
+        Counter, ancestor = user, name = name)
     return counter.count
 
-def increase_counter(name):
-    counter = ndbi.read_entity(Counter, {'name': name})
+def increase_counter(user, name):
+    counter = ndbi.read_entity(
+        Counter, ancestor = user, name = name)
     counter.count += 1
     counter.put()
     return counter.count
