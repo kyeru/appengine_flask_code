@@ -63,21 +63,6 @@ def read_entities(model, max_count, *args, **props):
     entities = list(bound_query.iter())
     return entities[:max_count]
 
-def read_sorted_entities(model, max_count, sort, asc, **props):
-    query = type(model).__getattribute__(model, 'query')
-    sort_target = type(model).__getattribute__(model, sort)
-    if props.has_key('ancestor'):
-        ancestor_key = props['ancestor']
-        props.pop('ancestor')
-        ndb_filter = make_ndb_filter(model, dict(props))
-        entities = list(query(ndb_filter, ancestor = ancestor_key).
-            order(sort_target if asc else -sort).iter())
-        return entities[:max_count]
-    else:
-        ndb_filter = make_ndb_filter(model, dict(props))
-        entities = list(query(ndb_filter).iter())
-        return entities[:max_count]
-
 def read_entity(model, *args, **props):
     result = read_entities(model, 1, *args, **props)
     if len(result) > 0:
