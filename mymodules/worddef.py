@@ -14,7 +14,7 @@ class WordDefException(Exception):
         self.message = message
 
     def __str__(self):
-        return 'worddef: ' + self.message
+        return '[WordDefException] ' + self.message
 
 class WordDef(ndb.Model):
     num_id = ndb.IntegerProperty()
@@ -34,8 +34,10 @@ def get_worddef_by_id(num_id):
     return (entity.word, entity.definition)
 
 def get_random_words(count = 1):
-    indexes = random.sample(
-        range(1, get_count(current_user(), group_name)), count)
+    total_word_count = get_count(current_user(), group_name)
+    if count >= total_word_count:
+        raise WordDefException('not enough word records')
+    indexes = random.sample(range(1, total_word_count), count)
     return [get_worddef_by_id(i) for i in indexes]
 
 def add_worddef(word, definition):

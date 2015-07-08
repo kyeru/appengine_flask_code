@@ -18,13 +18,18 @@ class QnARecord(ndb.Model):
     answer = ndb.IntegerProperty()
     choices = ndb.StringProperty(repeated = True)
 
+class GradeRecord(ndb.Model):
+    timestamp = ndb.FloatProperty()
+    quiz_count = ndb.IntegerProperty()
+    correct_count = ndb.IntegerProperty()
+
 # exception
 class QuizException:
     def __init__(self, msg):
         self.message = msg
 
     def __str__(self):
-        return 'QuizException(' + self.message + ')'
+        return '[QuizException] ' + self.message
 
 class QuestionAnswer:
     def __init__(self, choices, answer):
@@ -101,6 +106,21 @@ class QuizGenerator:
             num += 1
         return log
 
+def update_grade_record(is_correct):
+    try:
+        grade = ndbi.read_entity(GradeRecord,
+                                 ancestor = current_user(),
+                                 timestamp = session['timestamp'])
+        grade.quiz_count += 1
+        grade.correct_count += 1 if is_correct else 0
+        grade.put()
+    except ndbi.NDBIException:
+        ndbi.add_entity(GradeRecord,
+                        parent = current_user(),
+                        timestamp = session['timestamp'],
+                        quiz_count = 1,
+                        correct_count = 1 if is_correct else 0)
+
 def get_quiz_no():
     return random.randint(1, 65535)
 
@@ -147,11 +167,16 @@ def quiz_result():
         user_answer = request.form['choice']
         qna = QuizGenerator.load(quiz_no)
         QuizGenerator.delete(quiz_no)
+
+        is_correct = qna.evaluate(int(user_answer))
+        if get_user_id() != None:
+            update_grade_record(is_correct)
         return renderer.render_page('quiz_result.html',
-                                    result = qna.evaluate(int(user_answer)),
+                                    result = is_correct,
                                     answer = qna.answer,
                                     choices = qna.choices,
-                                    next_url = url_for('quiz_and_result'))
+                                    next_url = url_for('quiz_and_result'),
+                                    grade_url = url_for('quiz_grade'))
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_and_result')
 
@@ -176,7 +201,27 @@ def quiz_file_upload_result():
     except Exception as e:
         return renderer.error_page('quiz_file_upload_result(): ' + str(e),
                                    'upload_file')
-        
+def print_grade():
+    #grade = ndbi.read_entity(GradeRecord,
+    #                         ancestor = current_user(),
+    #                         timestamp = session['timestamp'])
+    # grade_history = ndbi.read_entities(GradeRecord,
+    #                                    10,
+    #                                    ancestor = current_user())
+
+    grade_history = ndbi.read_entities(
+        GradeRecord,
+        10,
+        sort = 'timestamp',
+        ancestor = current_user())
+
+    grade_history.reverse()
+    numbered_history = [(i + 1, grade_history[i])
+                        for i in range(len(grade_history))]
+    return renderer.render_page('quiz_grade.html',
+                                # last_grade = grade,
+                                grade_history = numbered_history)
+
 # unit test
 if __name__ == '__main__':
     sample = [('a', 'description of a'),

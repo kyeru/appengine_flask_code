@@ -19,7 +19,7 @@ class AppException(Exception):
         self.message = msg
     
     def __str__(self):
-        return 'AppException(' + self.message + ')'
+        return '[AppException] ' + self.message
 
 # default empty page
 @app.route('/')
@@ -56,6 +56,10 @@ def quiz_and_result():
         return quiz.quiz_input()
     else:
         return quiz.quiz_result()
+
+@app.route('/quiz/grade/')
+def quiz_grade():
+    return quiz.print_grade()
 
 # error handler
 @app.errorhandler(404)

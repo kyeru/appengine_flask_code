@@ -10,6 +10,9 @@
 <link rel="stylesheet" type="text/css" href="{{ style_url }}">
 {% endif %}
 
+{% block script %}
+{% endblock %}
+
 </head>
 
 <body>
@@ -22,6 +25,7 @@
     <li><a href="/logout"><b>logout</b></a></li>
     {% endif %}
     <li><a href="/quiz"><b>quiz</b></a></li>
+    <li><a href="/quiz/grade"><b>grade</b></a></li>
     <li><a href="/random"><b>random</b></a></li>
     <li><a href="/upload"><b>upload</b></a></li>
   </ul>

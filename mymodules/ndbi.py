@@ -5,7 +5,7 @@ class NDBIException(Exception):
         self.message = message
         
     def __str__(self):
-        return 'NDBIException(' + self.message + ')'
+        return '[NDBIException] ' + self.message
 
 def make_ndb_filter(model, props):
     if len(props) == 0:
@@ -20,21 +20,66 @@ def make_ndb_filter(model, props):
         return ndb.AND(attribute == value,
                        make_ndb_filter(model, dict(prop_list[1:])))
 
-def read_entities(model, max_count, **props):
+def read_entities(model, max_count, *args, **props):
     query = type(model).__getattribute__(model, 'query')
+
+    ancestor_key = None
+    if props.has_key('ancestor'):
+        ancestor_key = props['ancestor']
+        props.pop('ancestor')
+    sort = None
+    if props.has_key('sort'):
+        sort = props['sort']
+        props.pop('sort')
+    sort_asc = False
+    if props.has_key('asc'):
+        sort_asc = props['asc']
+        props.pop('asc')
+    ndb_filter = None
+    if len(props) > 0:
+        ndb_filter = make_ndb_filter(model, dict(props))
+
+    entities = list()
+    bound_query = None
+    if ndb_filter != None:
+        if ancestor_key != None:
+            bound_query = query(ndb_filter,
+                                *args,
+                                ancestor = ancestor_key)
+        else:
+            bound_query = query(ndb_filter, *args)
+    else:
+        if ancestor_key != None:
+            bound_query = query(*args,
+                                ancestor = ancestor_key)
+        else:
+            bound_query = query(*args)
+
+    if sort != None:
+        sort_target = type(model).__getattribute__(model, sort)
+        bound_query = bound_query.order(
+            sort_target if sort_asc else -sort_target)
+
+    entities = list(bound_query.iter())
+    return entities[:max_count]
+
+def read_sorted_entities(model, max_count, sort, asc, **props):
+    query = type(model).__getattribute__(model, 'query')
+    sort_target = type(model).__getattribute__(model, sort)
     if props.has_key('ancestor'):
         ancestor_key = props['ancestor']
         props.pop('ancestor')
         ndb_filter = make_ndb_filter(model, dict(props))
-        entities = list(query(ndb_filter, ancestor = ancestor_key).iter())
+        entities = list(query(ndb_filter, ancestor = ancestor_key).
+            order(sort_target if asc else -sort).iter())
         return entities[:max_count]
     else:
         ndb_filter = make_ndb_filter(model, dict(props))
         entities = list(query(ndb_filter).iter())
         return entities[:max_count]
 
-def read_entity(model, **props):
-    result = read_entities(model, 1, **props)
+def read_entity(model, *args, **props):
+    result = read_entities(model, 1, *args, **props)
     if len(result) > 0:
         return result[0]
     else:

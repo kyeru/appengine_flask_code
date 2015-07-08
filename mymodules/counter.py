@@ -11,7 +11,7 @@ class CounterException(Exception):
         self.message = message
 
     def __str__(self):
-        return 'CounterException(' + self.message +')'
+        return '[CounterException] ' + self.message
 
 def initiate_counter(user, name):
     try:
