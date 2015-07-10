@@ -211,7 +211,7 @@ def print_grade():
 
     grade_history = ndbi.read_entities(
         GradeRecord,
-        10,
+        20,
         sort = 'timestamp',
         ancestor = current_user())
 

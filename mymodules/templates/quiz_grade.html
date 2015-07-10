@@ -26,14 +26,16 @@
     ]);
 
     // Set chart options
-    var options = {'title':'Grades of last 10 quizes',
+    var options = {'title':'Grades of last 20 quizes',
     			   hAxis: {
-    			   	 title: 'Number'
+    			   	 title: 'Your Try',
+    			   	 ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
     			   },
     			   vAxis: {
-    			   	 title: 'Grade (100 scale)'
+    			   	 title: 'Grade (100 scale)',
+    			   	 ticks: [0, 20, 40, 60, 80, 100],
     			   },
-                   'width':400,
+                   'width':600,
                    'height':300};
 
     // Instantiate and draw our chart, passing in some options.
