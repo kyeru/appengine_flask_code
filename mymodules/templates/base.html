@@ -19,15 +19,19 @@
 
 <div class="nav">
   <ul class="hlist">
+    <li><a href="/howto"><b>howto</b></a></li>
     {% if not user_id %}
     <li><a href="/login"><b>login</b></a></li>
     {% else %}
     <li><a href="/logout"><b>logout</b></a></li>
     {% endif %}
     <li><a href="/quiz"><b>quiz</b></a></li>
+    {% if user_id in session %}
     <li><a href="/quiz/grade"><b>grade</b></a></li>
+    {% endif %}
     <li><a href="/random"><b>random</b></a></li>
     <li><a href="/upload"><b>upload</b></a></li>
+    <li><a href="/about"><b>about</b></a></li>
   </ul>
 </div>
 

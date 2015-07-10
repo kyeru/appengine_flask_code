@@ -31,6 +31,16 @@ def default():
 def signin():
     return renderer.under_construction()
 
+# howto
+@app.route('/howto/')
+def howto():
+    return renderer.render_page('howto.html')
+
+# about
+@app.route('/about/')
+def about():
+    return renderer.render_page('about.html')
+
 # login
 @app.route('/login/', methods = ['GET', 'POST'])
 def login():

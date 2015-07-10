@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>
+Quiz-it-by-yourself is a self-building quiz site where you can prepare and try your own questions everyday to boost your memory and knowledge.
+</p>
+<p>
+You can freely create your account to keep your distinctive questions and grade records, or just make some fun with anonymous mode. However, even creating an account does not give you any worry for security and identity issue, because it does not require anything about you! Just login with some unduplicative - hopefully unduplicated of any other, I invented :) - nickname, and you can keep going with the name as long as you want.
+</p>
+<p>
+To prepare your own questions, first click "upload" link in the navigation tab, and choose a file in your computer. Your file must have one or more pair of item and description. For example:
+</p>
+<pre>
+	Apple	Delicious!
+	Orange	So fresh!
+	Peach	My favorite!
+	...
+	Durian	Uh.. it stinks.
+</pre>
+<p>
+Item and description should be separated by tab, and each pair should span one line. Unconformant input file will cause upload to fail. Uploading is accumulative, which means you add new entries to existing ones except duplicate items.
+</p>
+<p>
+What happens when you click the button in the upload page? Each pair is stored as quiz material. When you click "quiz" link, it will randomly (for now, but not too long before a better selection algorithm comes to my mind) compose choice quiz from the material like this:
+</p>
+<pre>
+	Question: Apple
+	[] So fresh!
+	[] Uh.. it stinks.
+	[] My favorite!
+	[] Delicious!
+</pre>
+<p>
+What is the correct answer? Of course! ...2? Every time you choose an answer and click "submit" button, you will see if you're right or wrong. You can either click "next quiz" link and continue, or choose "stop and print the result" to stop torturing your brain and be relieved with grade report, which notices you how smart you are.
+</p>
+<p>
+Isn't it easy enough? I hope you think so, too. Right now, there's only one room of quiz for each user, so you can't upload different kinds of material: fruits vs. comics? Soon you may have more slots and manage different quiz types.
+</p>
+<p>
+For those who are reluctant to gather data and upload files, don't worry. There is a ready-made quiz for anonymous user. You just go ahead and try, although no grade is recorded for anonymous.
+</p>
+<p>
+That's it! Thank you for visiting.
+</p>
+
+{% endblock %}
