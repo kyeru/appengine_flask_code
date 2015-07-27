@@ -5,64 +5,81 @@ from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
-from mymodules.user import *
+#from mymodules.user import *
 
-group_name = 'WordDef'
+#####################################################################
+# ndb schema
+#####################################################################
 
-class WordDefException(Exception):
+class NameDef(ndb.Model):
+    num_id = ndb.IntegerProperty()
+    category = ndb.StringProperty()
+    name = ndb.StringProperty()
+    definition = ndb.StringProperty()
+
+#####################################################################
+# exception
+#####################################################################
+
+class NameDefException(Exception):
     def __init__(self, message):
         self.message = message
 
     def __str__(self):
-        return '[WordDefException] ' + self.message
+        return '[NameDefException] ' + self.message
 
-class WordDef(ndb.Model):
-    num_id = ndb.IntegerProperty()
-    word = ndb.StringProperty()
-    definition = ndb.StringProperty()
+#####################################################################
+# class and functions
+#####################################################################
 
-def get_definition(word):
-    entity = ndbi.read_entity(WordDef,
-                              ancestor = current_user(),
-                              word = word)
+def get_def_by_name(user, category, name):
+    entity = ndbi.read_entity(NameDef,
+                              ancestor = user,
+                              category = category,
+                              name = name)
     return entity.definition
 
-def get_worddef_by_id(num_id):
-    entity = ndbi.read_entity(WordDef,
-                              ancestor = current_user(),
+def get_item_by_id(user, category, num_id):
+    entity = ndbi.read_entity(NameDef,
+                              ancestor = user,
+                              category = category,
                               num_id = num_id)
-    return (entity.word, entity.definition)
+    return (entity.name, entity.definition)
 
-def get_random_words(count = 1):
-    total_word_count = get_count(current_user(), group_name)
-    if count >= total_word_count:
-        raise WordDefException('not enough word records')
-    indexes = random.sample(range(1, total_word_count), count)
-    return [get_worddef_by_id(i) for i in indexes]
+def get_random_items(user, category, count = 1):
+    total_item_count = get_count(user, category)
+    if count >= total_item_count:
+        raise NameDefException('not enough records stored')
+    indexes = random.sample(range(1, total_item_count), count)
+    return [get_item_by_id(user, category, i) for i in indexes]
 
-def add_worddef(word, definition):
+def add_item(user, category, name, definition):
     try:
-        get_definition(word)
+        get_def_by_name(user, category, name)
     except ndbi.NDBIException:
         # OK, a new word. Move on.
         pass
     else:
-        raise WordDefException('duplicate write for ' + word)
+        raise NameDefException('duplicate write for ' + name)
 
-    word_count = increase_counter(current_user(), group_name)
-    ndbi.add_entity(WordDef,
-                    parent = current_user(),
-                    num_id = word_count,
-                    word = word,
+    item_count = increase_counter(user, category)
+    ndbi.add_entity(NameDef,
+                    parent = user,
+                    category = category,
+                    num_id = item_count,
+                    name = name,
                     definition = definition)
 
+#####################################################################
 # page rendering
-def random_word():
+#####################################################################
+
+def random_item():
     try:
-        (word, definition) = get_random_words(1)[0]
-        return renderer.render_page('word_def.html',
-                                    word = word,
+        (name, definition) = get_random_items(1)[0]
+        return renderer.render_page('name_def.html',
+                                    name = name,
                                     definition = definition)
     except Exception as e:
-        return renderer.error_page('random_word(): ' + str(e),
-                                   'read_random_word')
+        return renderer.error_page('random_item(): ' + str(e),
+                                   'read_random_item')

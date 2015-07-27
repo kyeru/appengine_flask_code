@@ -26,7 +26,11 @@
     ]);
 
     // Set chart options
-    var options = {'title':'Grades of last 20 quizes',
+    {% if category %}
+    var options = {'title':'Grades of last 20 tries in {{ category }}',
+    {% else %}
+    var options = {'title':'Grades of last 20 tries',
+    {% endif %}
     			   hAxis: {
     			   	 title: 'Your Try',
     			   	 ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
@@ -53,6 +57,9 @@
 {% endif %}
 
 {% if grade_history %}
+{% if grade_history.length is equalto 0 %}
+<div><p>Sorry, no grade history to print</p></div>
+{% else %}
 <div id="grade_history"></div>
 {% endif %}
 

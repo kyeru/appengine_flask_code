@@ -37,4 +37,7 @@ def current_user():
     if 'user_id' in session:
         return ndb.Key(User, session['user_id'])
     else:
-        return ndb.Key(User, 'anonymous')
+        return anonymous()
+
+def anonymous():
+    return ndb.Key(User, 'anonymous')

@@ -21,6 +21,10 @@ class AppException(Exception):
     def __str__(self):
         return '[AppException] ' + self.message
 
+#####################################################################
+# routing
+#####################################################################
+
 # default empty page
 @app.route('/')
 def default():
@@ -59,17 +63,27 @@ def upload_file():
     else:
         return quiz.quiz_file_upload_result()
 
-# quiz
-@app.route('/quiz/', methods = ['GET', 'POST'])
-def quiz_and_result():
-    if request.method == 'GET':
-        return quiz.quiz_input()
+# common quiz types
+@app.route('/common/')
+@app.route('/common/<category>', methods = ['GET', 'POST'])
+def common_type_quiz(category = None):
+    if category == None:
+        return quiz.common_quiz_map()
     else:
-        return quiz.quiz_result()
+        if request.method == 'GET':
+            return quiz.quiz_input(category, True)
+        else:
+            return quiz.evaluate_result(category, True)
 
-@app.route('/quiz/grade/')
-def quiz_grade():
-    return quiz.print_grade()
+# user-defined quiz types
+#@app.route('/yours/')
+#@app.route('/yours/<item>')
+#def user_defined_quiz():
+#    return user_quiz_map()
+
+@app.route('/grade/<category>/')
+def print_grade(category):
+    return quiz.check_grade(category)
 
 # error handler
 @app.errorhandler(404)
@@ -87,15 +101,5 @@ def internal_server_error(e):
 
 # test
 @app.route('/random/')
-def read_random_word():
-    return worddef.random_word()
-
-# unused
-@app.route('/test/')
-@app.route('/test/<something>/')
-def test_page():
-    page += '<body>'
-    page += '<h1>App engine + Flask test</h1>'
-    page += '<p>this is test paragraph</p>'
-    page += '</body>'
-    return page
+def read_random_item():
+    return namedef.random_item()
