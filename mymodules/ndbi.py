@@ -61,7 +61,7 @@ def read_entities(model, max_count, *args, **props):
             sort_target if sort_asc else -sort_target)
 
     entities = list(bound_query.iter())
-    return entities[:max_count]
+    return entities[:max_count] if max_count > 0 else entities
 
 def read_entity(model, *args, **props):
     result = read_entities(model, 1, *args, **props)

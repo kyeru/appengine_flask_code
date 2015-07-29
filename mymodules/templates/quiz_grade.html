@@ -9,42 +9,39 @@
   // Set a callback to run when the Google Visualization API is loaded.
   google.setOnLoadCallback(drawChart);
 
+  // Set chart options
+  var options = {
+    'title':'Grades of last 20 tries',
+    hAxis: {
+      title: 'Your Try',
+      ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
+    },
+    vAxis: {
+      title: 'Grade (100 scale)',
+      ticks: [0, 20, 40, 60, 80, 100],
+    },
+    'width':600,
+    'height':300};
+
   // Callback that creates and populates a data table,
   // instantiates the pie chart, passes in the data and
   // draws it.
   function drawChart() {
-    // Create the data table.
-    var data = new google.visualization.DataTable();
-    data.addColumn('number', 'number');
-    data.addColumn('number', 'grade');
-    data.addRows([
-      {% if grade_history %}
-      {% for num, grade in grade_history %}
-      [{{ num }}, {{ grade.correct_count / grade.quiz_count * 100 }}],
-      {% endfor %}
-      {% endif %}
-    ]);
-
-    // Set chart options
-    {% if category %}
-    var options = {'title':'Grades of last 20 tries in {{ category }}',
-    {% else %}
-    var options = {'title':'Grades of last 20 tries',
-    {% endif %}
-    			   hAxis: {
-    			   	 title: 'Your Try',
-    			   	 ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
-    			   },
-    			   vAxis: {
-    			   	 title: 'Grade (100 scale)',
-    			   	 ticks: [0, 20, 40, 60, 80, 100],
-    			   },
-                   'width':600,
-                   'height':300};
-
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('grade_history'));
-    chart.draw(data, options);
+    {%- for c, grade_history in all_histories %}
+      // Create the data table.
+      var {{ c }}_data = new google.visualization.DataTable();
+      {{ c }}_data.addColumn('number', 'try');
+      {{ c }}_data.addColumn('number', 'grade');
+      {{ c }}_data.addRows([
+      {%- for num, grade in grade_history -%}
+        [{{ num }}, {{ grade.correct_count / grade.quiz_count * 100 }}],
+      {%- endfor -%}
+      ]);
+      // Instantiate and draw our chart, passing in some options.
+      var {{ c }}_chart = new google.visualization.LineChart(
+        document.getElementById('{{ c }}_grade_history'))
+      {{ c }}_chart.draw({{ c }}_data, options);
+    {% endfor %}
   }
 </script>
 
@@ -52,15 +49,9 @@
 
 {% block content %}
 
-{% if last_grade %}
-<p>your grade is {{ last_grade.correct_count / last_grade.quiz_count * 100}}</p>
-{% endif %}
-
-{% if grade_history %}
-{% if grade_history.length is equalto 0 %}
-<div><p>Sorry, no grade history to print</p></div>
-{% else %}
-<div id="grade_history"></div>
-{% endif %}
+{% for c, grade_history in all_histories %}
+<div>{{ c }}</div>
+<div id="{{ c }}_grade_history"></div>
+{% endfor %}
 
 {% endblock %}

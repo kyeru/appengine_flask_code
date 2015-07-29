@@ -13,6 +13,9 @@ from mymodules.worddef import *
 # ndb schema
 #####################################################################
 
+class Category(ndb.Model):
+    name = ndb.StringProperty()
+
 class QnARecord(ndb.Model):
     quiz_no = ndb.IntegerProperty()
     answer = ndb.IntegerProperty()
@@ -162,8 +165,19 @@ def user_defined_quiz_map():
     return renderer.render_page('quiz_map.html',
                                 categories = user_categories)
 
+def add_new_category(category):
+    try:
+        ndbi.read_entity(Category,
+                         ancestor = current_user(),
+                         name = category)
+    except ndbi.NDBIException:
+        ndbi.add_entity(Category,
+                        parent = current_user(),
+                        name = category)
+
 def quiz_input(category, common):
     try:
+        add_new_category(category)
         quiz_no = request.args.get('no')
         if quiz_no == None:
             if common:
@@ -219,7 +233,7 @@ def evaluate_result(category, common):
                                     answer = qna.answer,
                                     choices = qna.choices,
                                     next_url = next_url,
-                                    grade_url = url_for('quiz_grade'))
+                                    grade_url = url_for('print_grade'))
     except Exception as e:
         if common:
             return renderer.error_page(str(e), 'common_type_quiz')
@@ -249,20 +263,30 @@ def quiz_file_upload_result():
     except Exception as e:
         return renderer.error_page('quiz_file_upload_result(): ' + str(e),
                                    'upload_file')
+
 def check_grade(category):
-    grade_history = ndbi.read_entities(
-        GradeRecord,
-        20,
-        sort = 'timestamp',
-        ancestor = current_user(),
-        category = category)
-    grade_history.reverse()
-    numbered_history = [(i + 1, grade_history[i])
-                        for i in range(len(grade_history))]
+    categories = []
+    if category == None:
+        categories = ndbi.read_entities(Category,
+                                        0,
+                                        ancestor = current_user())
+    else:
+        categories.append(category)
+    categories = [c.name for c in categories]
+
+    all_histories = []
+    for c in categories:
+        grade_history = ndbi.read_entities(GradeRecord,
+                                           20,
+                                           sort = 'timestamp',
+                                           ancestor = current_user(),
+                                           category = c)
+        grade_history.reverse()
+        numbered_history = [(i + 1, grade_history[i])
+            for i in range(len(grade_history))]
+        all_histories.append((c, numbered_history))
     return renderer.render_page('quiz_grade.html',
-                                # last_grade = grade,
-                                category = category,
-                                grade_history = numbered_history)
+                                all_histories = all_histories)
 
 #####################################################################
 # unit test
