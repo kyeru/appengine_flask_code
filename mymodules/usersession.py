@@ -32,16 +32,13 @@ def login_page():
         return renderer.render_page('login.html')
     else:
         user_id = request.form['user_id'].strip()
-        login_timestamp = time.time()
         if issafe(user_id):
             if not user_exists(user_id):
                 add_user(user_id)
                 session['user_id'] = user_id
-                session['timestamp'] = login_timestamp
                 initiate_user_record(user_id)
             else:
                 session['user_id'] = user_id
-                session['timestamp'] = login_timestamp
             flash('welcome %s.' % user_id)
         else:
             flash('invalid user name %s.' % user_id)

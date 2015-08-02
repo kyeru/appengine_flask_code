@@ -1,4 +1,5 @@
 import random
+import time
 
 from flask import redirect, request, url_for
 from google.appengine.ext import ndb
@@ -149,6 +150,16 @@ def parse_file(f):
         word_defs.append((str(word_def[0]), str(word_def[1])))
     return word_defs
 
+def add_new_category(category):
+    try:
+        ndbi.read_entity(Category,
+                         ancestor = current_user(),
+                         name = category)
+    except ndbi.NDBIException:
+        ndbi.add_entity(Category,
+                        parent = current_user(),
+                        name = category)
+
 #####################################################################
 # page rendering
 #####################################################################
@@ -165,18 +176,11 @@ def user_defined_quiz_map():
     return renderer.render_page('quiz_map.html',
                                 categories = user_categories)
 
-def add_new_category(category):
-    try:
-        ndbi.read_entity(Category,
-                         ancestor = current_user(),
-                         name = category)
-    except ndbi.NDBIException:
-        ndbi.add_entity(Category,
-                        parent = current_user(),
-                        name = category)
-
 def quiz_input(category, common):
     try:
+        if not 'timestamp' in session:
+            session['timestamp'] = time.time()
+
         add_new_category(category)
         quiz_no = request.args.get('no')
         if quiz_no == None:
@@ -265,6 +269,8 @@ def quiz_file_upload_result():
                                    'upload_file')
 
 def check_grade(category):
+    if 'timestamp' in session:
+        del session['timestamp']
     categories = []
     if category == None:
         categories = ndbi.read_entities(Category,
