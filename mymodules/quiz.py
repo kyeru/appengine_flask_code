@@ -171,8 +171,12 @@ def common_quiz_map():
                                 categories = common_categories)
 
 def user_defined_quiz_map():
-    # FIXME
-    global common_categories
+    user_categories = ndbi.read_entities(Category,
+                                         0,
+                                         ancestor = current_user())
+    categories = []
+    for category in user_categories:
+        categories.append(category.name)
     return renderer.render_page('quiz_map.html',
                                 categories = user_categories)
 

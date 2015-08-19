@@ -9,4 +9,43 @@
   <div><input type="submit" name="submit" /></div>
 </form>
 
+<h3>
+How to upload quiz materials:
+</h3>
+<p>
+You can create your own questionairs by uploading simple text files. Uploaded file should consist of one or more lines, and each line represents a pair of an item and its description, just as following:
+</p>
+<pre>
+	Apple	Delicious!
+	Orange	So fresh!
+	Peach	My favorite!
+	...
+	Durian	Uh.. it stinks.
+</pre>
+<p>
+Each pair must be separated by tab and span one line. To upload a file, click "file" button and choose the file in the navigator.
+</p>
+<p>
+In quiz page, you will see a randomly chosen item and multiple choices.
+</p>
+<pre>
+	Question: Apple
+	[] So fresh!
+	[] Uh.. it stinks.
+	[] My favorite!
+	[] Delicious!
+</pre>
+<p>
+You can have more than one quiz categories. You, therefore, need to specify which category you are uploading content to. You need to write category name in the text field to create a new category, or to upload to an existing one.
+</p>
+<p>
+After choosing file and category, click "submit" button to complete uploading. If everything goes OK, you will see how many items are stored and ignored; wait, ignored? you will see why just below. If you see an error message, please check your file again.
+</p>
+<p>
+When you create a new category with one file, and upload another to the same category, items will be accumulated. Duplicate items are ignored - this is why "ignored count" is shown in the result message.
+</p>
+<p>
+Now, let's go to the quiz page and see your new quiz category is ready to serve.
+</p>
+
 {% endblock %}

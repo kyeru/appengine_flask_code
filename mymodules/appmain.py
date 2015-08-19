@@ -35,11 +35,6 @@ def default():
 def signin():
     return renderer.under_construction()
 
-# howto
-@app.route('/howto/')
-def howto():
-    return renderer.render_page('howto.html')
-
 # about
 @app.route('/about/')
 def about():
@@ -80,9 +75,12 @@ def common_type_quiz(category = None):
 @app.route('/yours/<category>/', methods = ['GET', 'POST'])
 def user_defined_quiz(category = None):
     if category == None:
-        return quiz.common_quiz_map()
+        return quiz.user_defined_quiz_map()
     else:
-        return quiz.common_quiz_map()
+        if request.method == 'GET':
+            return quiz.quiz_input(category, False)
+        else:
+            return quiz.evaluate_result(category, False)
 
 @app.route('/grade/')
 @app.route('/grade/<category>/')
