@@ -8,4 +8,14 @@
 
 {% endfor %}
 
+<p>Your categories:</p>
+{% for category in user_categories %}
+<div><a href="{{ category }}">{{ category }}</a></div>
+{% endfor %}
+
+<p>Common categories:</p>
+{% for category in common_categories %}
+<div><a href="{{ category }}">{{ category }}</a></div>
+{% endfor %}
+
 {% endblock %}

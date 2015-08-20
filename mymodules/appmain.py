@@ -58,29 +58,17 @@ def upload_file():
     else:
         return quiz.quiz_file_upload_result()
 
-# common quiz types
-@app.route('/common/')
-@app.route('/common/<category>/', methods = ['GET', 'POST'])
-def common_type_quiz(category = None):
+# quiz
+@app.route('/quiz/')
+@app.route('/quiz/<category>/', methods = ['GET', 'POST'])
+def quiz_start(category = None):
     if category == None:
-        return quiz.common_quiz_map()
+        return quiz.quiz_map()
     else:
         if request.method == 'GET':
-            return quiz.quiz_input(category, True)
+            return quiz.quiz_input(category)
         else:
-            return quiz.evaluate_result(category, True)
-
-# user-defined quiz types
-@app.route('/yours/')
-@app.route('/yours/<category>/', methods = ['GET', 'POST'])
-def user_defined_quiz(category = None):
-    if category == None:
-        return quiz.user_defined_quiz_map()
-    else:
-        if request.method == 'GET':
-            return quiz.quiz_input(category, False)
-        else:
-            return quiz.evaluate_result(category, False)
+            return quiz.evaluate_result(category)
 
 @app.route('/grade/')
 @app.route('/grade/<category>/')

@@ -150,14 +150,14 @@ def parse_file(f):
         word_defs.append((str(word_def[0]), str(word_def[1])))
     return word_defs
 
-def add_new_category(category):
+def add_new_category(category, user):
     try:
         ndbi.read_entity(Category,
-                         ancestor = current_user(),
+                         ancestor = user,
                          name = category)
     except ndbi.NDBIException:
         ndbi.add_entity(Category,
-                        parent = current_user(),
+                        parent = user,
                         name = category)
 
 #####################################################################
@@ -165,6 +165,17 @@ def add_new_category(category):
 #####################################################################
 
 common_categories = ['WordDef']
+
+def quiz_map():
+    your_categories = ndbi.read_entities(Category,
+                                         0,
+                                         ancestor = current_user())
+    user_categories = []
+    for c in your_categories:
+        user_categories.append(c.name)
+    return renderer.render_page('quiz_map.html',
+                                common_categories = common_categories,
+                                user_categories = user_categories)
 
 def common_quiz_map():
     return renderer.render_page('quiz_map.html',
@@ -180,23 +191,21 @@ def user_defined_quiz_map():
     return renderer.render_page('quiz_map.html',
                                 categories = user_categories)
 
-def quiz_input(category, common):
+def quiz_input(category):
     try:
         if not 'timestamp' in session:
             session['timestamp'] = time.time()
 
-        add_new_category(category)
         quiz_no = request.args.get('no')
         if quiz_no == None:
-            if common:
-                return redirect(url_for('common_type_quiz',
-                                        category = category,
-                                        no = get_quiz_no()))
-            else:
-                return redirect(url_for('common_type_quiz',
-                                        category = category,
-                                        no = get_quiz_no()))
+            return redirect(url_for('quiz_start',
+                                     category = category,
+                                     no = get_quiz_no()))
+
+        common = category in common_categories
         user = anonymous() if common else current_user()
+        add_new_category(category, user)
+
         content = get_random_items(user, category, 4)
         answer = random.randint(0, len(content) - 1) + 1
         qna = QuestionAnswer(content, answer)
@@ -213,14 +222,10 @@ def quiz_input(category, common):
                                     target = target,
                                     choices = numbered_choices)
     except Exception as e:
-        if common:
-            return renderer.error_page(str(e), 'common_type_quiz')
-        else:
-            return renderer.error_page(str(e), 'common_type_quiz')
+        return renderer.error_page(str(e), 'quiz_start')
 
-def evaluate_result(category, common):
+def evaluate_result(category):
     try:
-        #user = anonymous() if common else current_user()
         quiz_no = int(request.args.get('no', ''))
         qna = QuizGenerator.load(quiz_no)
         QuizGenerator.delete(quiz_no)
@@ -229,12 +234,7 @@ def evaluate_result(category, common):
         is_correct = qna.evaluate(int(user_answer))
         if get_user_id() != None:
             update_grade_record(category, is_correct)
-        next_url = ''
-        if common:
-            next_url = url_for('common_type_quiz', category = category)
-        else:
-            #next_url = url_for('user_defined_quiz', category = category)
-            next_url = url_for('common_type_quiz', category = category)
+        next_url = url_for('quiz_start', category = category)
         grade_url = url_for('print_grade', category = category)
         return renderer.render_page('quiz_result.html',
                                     result = is_correct,
@@ -243,10 +243,7 @@ def evaluate_result(category, common):
                                     next_url = next_url,
                                     grade_url = url_for('print_grade'))
     except Exception as e:
-        if common:
-            return renderer.error_page(str(e), 'common_type_quiz')
-        else:
-            return renderer.error_page(str(e), 'common_type_quiz')
+        return renderer.error_page(str(e), 'quiz_start')
 
 def quiz_file_upload():
     return renderer.render_page('file_upload.html')
