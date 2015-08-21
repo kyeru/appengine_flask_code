@@ -1,4 +1,5 @@
 from os import urandom
+import datetime
 
 from flask import Flask, request, session
 
@@ -10,6 +11,7 @@ from mymodules import worddef
 app = Flask(__name__)
 app.Debug = True
 app.secret_key = urandom(24)
+app.permanent_session_lifetime = datetime.timedelta(hours = 1)
 
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
