@@ -17,13 +17,15 @@
 
 <body>
 
+<div class="login">
+  {% if not user_id %}
+  <a href="/login">login</a>
+  {% else %}
+  <a href="/logout">logout</a>
+  {% endif %}
+</div>
 <div class="nav">
   <ul class="hlist">
-    {% if not user_id %}
-    <li><a href="/login"><b>login</b></a></li>
-    {% else %}
-    <li><a href="/logout"><b>logout</b></a></li>
-    {% endif %}
     <li><a href="/quiz"><b>quiz</b></a></li>
     {% if user_id %}
     <li><a href="/grade"><b>grade</b></a></li>
