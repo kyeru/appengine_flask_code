@@ -274,12 +274,14 @@ def check_grade(category):
         del session['timestamp']
     categories = []
     if category == None:
-        categories = ndbi.read_entities(Category,
-                                        0,
-                                        ancestor = current_user())
+        categories = ndbi.read_entities(Category, 0)
+        #categories = ndbi.read_entities(Category,
+        #                                0,
+        #                                ancestor = current_user())
+
+        categories = [c.name for c in categories]
     else:
         categories.append(category)
-    categories = [c.name for c in categories]
 
     all_histories = []
     for c in categories:
