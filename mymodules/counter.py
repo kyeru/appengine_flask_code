@@ -13,12 +13,13 @@ class CounterException(Exception):
     def __str__(self):
         return '[CounterException] ' + self.message
 
-def initiate_counter(user, name):
+def initiate_counter(user, name, overwrite = True):
     try:
         counter = ndbi.read_entity(
             Counter, ancestor = user, name = name)
-        counter.count = 0
-        counter.put()
+        if overwrite:
+            counter.count = 0
+            counter.put()
     except ndbi.NDBIException:
         ndbi.add_entity(Counter,
                         parent = user,
