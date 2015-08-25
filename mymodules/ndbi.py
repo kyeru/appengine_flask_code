@@ -63,6 +63,21 @@ def read_entities(model, max_count, *args, **props):
     entities = list(bound_query.iter())
     return entities[:max_count] if max_count > 0 else entities
 
+#####################################################################
+# CRUD operations
+#####################################################################
+
+def create_entity(model, **props):
+    #if len(read_entities(model, 1, **props)) > 0:
+    #    raise NDBIException(
+    #        'Entity ' + str(model) + ' for ' + str(props) + ' exists.')
+    if props.has_key('ancestor'):
+        ancestor_key = props['ancestor']
+        props.pop('ancestor')
+        props['parent'] = ancestor_key
+    entity = model(**props)
+    entity.put()
+
 def read_entity(model, *args, **props):
     result = read_entities(model, 1, *args, **props)
     if len(result) > 0:
@@ -71,10 +86,44 @@ def read_entity(model, *args, **props):
         raise NDBIException(
             'Entity ' + str(model) + ' for ' + str(props) + ' not found.')
 
-def add_entity(model, **props):
-    entity = model(**props)
-    entity.put()
+def update_entity(model, **props):
+    try:
+        result = read_entity(model, **props)
+        if len(result) > 0:
+            if props.has_key('ancestor'):
+                ancestor_key = props['ancestor']
+                props.pop('ancestor')
+                props['parent'] = ancestor_key
+            target = result.key.get()
+            target.populate(**props)
+            target.put()
+    except NDBIException as e:
+        raise NDBIException('Update error: ' + str(e))
 
 def delete_entity(model, **props):
-    entity = read_entity(model, **props)
-    entity.key.delete()
+    try:
+        entity = read_entity(model, **props)
+        entity.key.delete()
+    except NDBIException as e:
+        raise NDBIException('Delete error: ' + str(e))
+
+#####################################################################
+# unit test
+#####################################################################
+
+class TestUser(ndb.Model):
+    name = ndb.StringProperty()
+
+class TestModel(ndb.Model):
+    field1 = ndb.IntegerProperty()
+    field2 = ndb.StringProperty()
+
+if __name__ == '__main__':
+    user = TestUser(name = "test")
+    create_entity(TestModel, user, field1 = 1, field2 = "2")
+    result = read_entity(TestModel, user, field1 = 1)
+    assert(result.field2 == "2")
+    update_entity(TestModel, user, field1 = 1, field2 = "3")
+    result = read_entity(TestModel, user, field1 = 1)
+    assert(result.field2 == "3")
+    delete_entity(TestModel, user, field1 = 1)

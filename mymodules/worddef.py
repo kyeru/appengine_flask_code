@@ -63,12 +63,12 @@ def add_item(user, category, name, definition):
         raise NameDefException('duplicate write for ' + name)
 
     item_count = increase_counter(user, category)
-    ndbi.add_entity(NameDef,
-                    parent = user,
-                    category = category,
-                    num_id = item_count,
-                    name = name,
-                    definition = definition)
+    ndbi.create_entity(NameDef,
+                       parent = user,
+                       category = category,
+                       num_id = item_count,
+                       name = name,
+                       definition = definition)
 
 #####################################################################
 # page rendering

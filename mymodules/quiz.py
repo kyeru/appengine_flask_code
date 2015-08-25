@@ -71,11 +71,11 @@ class QuizGenerator:
             choices = []
             for name, description in qna.choices:
                 choices.append(description)
-            ndbi.add_entity(QnARecord,
-                            parent = current_user(),
-                            quiz_no = quiz_no,
-                            answer = qna.answer,
-                            choices = choices)
+            ndbi.create_entity(QnARecord,
+                               ancestor = current_user(),
+                               quiz_no = quiz_no,
+                               answer = qna.answer,
+                               choices = choices)
             return target, choices
         except Exception as e:
             raise QuizException(
@@ -91,11 +91,11 @@ class QuizGenerator:
             choices = []
             for name, description in qna.choices:
                 choices.append(name)
-            ndbi.add_entity(QnARecord,
-                            parent = current_user(),
-                            quiz_no = quiz_no,
-                            answer = qna.answer,
-                            choices = choices)
+            ndbi.create_entity(QnARecord,
+                               ancestor = current_user(),
+                               quiz_no = quiz_no,
+                               answer = qna.answer,
+                               choices = choices)
             return target, choices
         except Exception as e:
             raise QuizException(
@@ -128,12 +128,12 @@ def update_grade_record(category, is_correct):
         grade.correct_count += 1 if is_correct else 0
         grade.put()
     except ndbi.NDBIException:
-        ndbi.add_entity(GradeRecord,
-                        parent = current_user(),
-                        category = category,
-                        timestamp = session['timestamp'],
-                        quiz_count = 1,
-                        correct_count = 1 if is_correct else 0)
+        ndbi.create_entity(GradeRecord,
+                           ancestor = current_user(),
+                           category = category,
+                           timestamp = session['timestamp'],
+                           quiz_count = 1,
+                           correct_count = 1 if is_correct else 0)
 
 def get_quiz_no():
     return random.randint(1, 65535)
@@ -150,15 +150,15 @@ def parse_file(f):
         word_defs.append((str(word_def[0]), str(word_def[1])))
     return word_defs
 
-def add_new_category(category, user):
+def create_new_category(category, user):
     try:
         ndbi.read_entity(Category,
                          ancestor = user,
                          name = category)
     except ndbi.NDBIException:
-        ndbi.add_entity(Category,
-                        parent = user,
-                        name = category)
+        ndbi.create_entity(Category,
+                           ancestor = user,
+                           name = category)
 
 #####################################################################
 # page rendering
@@ -204,7 +204,7 @@ def quiz_input(category):
 
         common = category in common_categories
         user = anonymous() if common else current_user()
-        add_new_category(category, user)
+        create_new_category(category, user)
 
         content = get_random_items(user, category, 4)
         answer = random.randint(0, len(content) - 1) + 1
@@ -245,14 +245,18 @@ def evaluate_result(category):
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_start')
 
+#####################################################################
+# file upload
+#####################################################################
+
 def quiz_file_upload():
     return renderer.render_page('file_upload.html')
 
 def quiz_file_upload_result():
     try:
         namedefs = parse_file(request.files['uploaded'])
-        #category = request['category']
-        category = 'WordDef'
+        category = request.form['category']
+        initiate_counter(current_user(), category, overwrite = False)
         store_count = 0
         ignore_count = 0
         for (name, definition) in namedefs:
@@ -268,6 +272,10 @@ def quiz_file_upload_result():
     except Exception as e:
         return renderer.error_page('quiz_file_upload_result(): ' + str(e),
                                    'upload_file')
+
+#####################################################################
+# grade history
+#####################################################################
 
 def check_grade(category):
     if 'timestamp' in session:

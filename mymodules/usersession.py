@@ -17,10 +17,10 @@ class LoginException(Exception):
 def issafe(user_id):
     return user_id.isalnum()
 
-def initiate_user_record(user_id):
-    initiate_counter(current_user(), 'WordDef')
-
+#####################################################################
 # page rendering
+#####################################################################
+
 def signin():
     if request.method == 'GET':
         return renderer.under_construction()
@@ -36,7 +36,6 @@ def login_page():
             if not user_exists(user_id):
                 add_user(user_id)
                 session['user_id'] = user_id
-                initiate_user_record(user_id)
             else:
                 session['user_id'] = user_id
             flash('welcome %s.' % user_id)
