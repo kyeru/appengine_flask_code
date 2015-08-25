@@ -8,7 +8,7 @@ from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
 from mymodules.user import *
-from mymodules.worddef import *
+from mymodules.namedef import *
 
 #####################################################################
 # ndb schema

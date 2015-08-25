@@ -6,7 +6,6 @@ from flask import Flask, request, session
 from mymodules import quiz
 from mymodules import renderer
 from mymodules import usersession
-from mymodules import worddef
 
 app = Flask(__name__)
 app.Debug = True
