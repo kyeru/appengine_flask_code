@@ -57,9 +57,11 @@ class QuestionAnswer:
 class QuizGenerator:
     @staticmethod
     def load(quiz_no):
-        record = ndbi.read_entity(QnARecord,
-                                  ancestor = current_user(),
-                                  quiz_no = quiz_no)
+        record = ndbi.read(QnARecord,
+                           ancestor = current_user(),
+                           quiz_no = quiz_no)
+        if record == None:
+            raise QuizException('Record "' + quiz_no + '" not exists.')
         return QuestionAnswer(record.choices, record.answer)
 
     @staticmethod
@@ -71,11 +73,11 @@ class QuizGenerator:
             choices = []
             for name, description in qna.choices:
                 choices.append(description)
-            ndbi.create_entity(QnARecord,
-                               ancestor = current_user(),
-                               quiz_no = quiz_no,
-                               answer = qna.answer,
-                               choices = choices)
+            ndbi.create(QnARecord,
+                        ancestor = current_user(),
+                        quiz_no = quiz_no,
+                        answer = qna.answer,
+                        choices = choices)
             return target, choices
         except Exception as e:
             raise QuizException(
@@ -91,11 +93,11 @@ class QuizGenerator:
             choices = []
             for name, description in qna.choices:
                 choices.append(name)
-            ndbi.create_entity(QnARecord,
-                               ancestor = current_user(),
-                               quiz_no = quiz_no,
-                               answer = qna.answer,
-                               choices = choices)
+            ndbi.create(QnARecord,
+                        ancestor = current_user(),
+                        quiz_no = quiz_no,
+                        answer = qna.answer,
+                        choices = choices)
             return target, choices
         except Exception as e:
             raise QuizException(
@@ -104,9 +106,9 @@ class QuizGenerator:
 
     @staticmethod
     def delete(quiz_no):
-        ndbi.delete_entity(QnARecord,
-                           ancestor = current_user(),
-                           quiz_no = quiz_no)
+        ndbi.delete(QnARecord,
+                    ancestor = current_user(),
+                    quiz_no = quiz_no)
 
     @staticmethod
     def get_log(qna):
@@ -119,21 +121,21 @@ class QuizGenerator:
         return log
 
 def update_grade_record(category, is_correct):
-    try:
-        grade = ndbi.read_entity(GradeRecord,
-                                 ancestor = current_user(),
-                                 category = category,
-                                 timestamp = session['timestamp'])
+    grade = ndbi.read(GradeRecord,
+                      ancestor = current_user(),
+                      category = category,
+                      timestamp = session['timestamp'])
+    if grade == None:
+        ndbi.create(GradeRecord,
+                    ancestor = current_user(),
+                    category = category,
+                    timestamp = session['timestamp'],
+                    quiz_count = 1,
+                    correct_count = 1 if is_correct else 0)
+    else:
         grade.quiz_count += 1
         grade.correct_count += 1 if is_correct else 0
         grade.put()
-    except ndbi.NDBIException:
-        ndbi.create_entity(GradeRecord,
-                           ancestor = current_user(),
-                           category = category,
-                           timestamp = session['timestamp'],
-                           quiz_count = 1,
-                           correct_count = 1 if is_correct else 0)
 
 def get_quiz_no():
     return random.randint(1, 65535)
@@ -149,16 +151,6 @@ def parse_file(f):
                 'parse_file(): line %d invalid format' % line_num)
         word_defs.append((str(word_def[0]), str(word_def[1])))
     return word_defs
-
-def create_new_category(category, user):
-    try:
-        ndbi.read_entity(Category,
-                         ancestor = user,
-                         name = category)
-    except ndbi.NDBIException:
-        ndbi.create_entity(Category,
-                           ancestor = user,
-                           name = category)
 
 #####################################################################
 # page rendering
@@ -204,7 +196,6 @@ def quiz_input(category):
 
         common = category in common_categories
         user = anonymous() if common else current_user()
-        create_new_category(category, user)
 
         content = get_random_items(user, category, 4)
         answer = random.randint(0, len(content) - 1) + 1
@@ -250,10 +241,8 @@ def evaluate_result(category):
 #####################################################################
 
 def create_category(user, category):
-    try:
-        ndbi.read_entity(Category, ancestor = user, name = category)
-    except ndbi.NDBIException:
-        ndbi.create_entity(Category, ancestor = user, name = category)
+    if ndbi.read(Category, ancestor = user, name = category) == None:
+        ndbi.create(Category, ancestor = user, name = category)
 
 def quiz_file_upload():
     return renderer.render_page('file_upload.html')
@@ -290,10 +279,6 @@ def check_grade(category):
     categories = []
     if category == None:
         categories = ndbi.read_entities(Category, 0)
-        #categories = ndbi.read_entities(Category,
-        #                                0,
-        #                                ancestor = current_user())
-
         categories = [c.name for c in categories]
     else:
         categories.append(category)

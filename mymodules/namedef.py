@@ -33,17 +33,21 @@ class NameDefException(Exception):
 #####################################################################
 
 def get_def_by_name(user, category, name):
-    entity = ndbi.read_entity(NameDef,
-                              ancestor = user,
-                              category = category,
-                              name = name)
+    entity = ndbi.read(NameDef,
+                       ancestor = user,
+                       category = category,
+                       name = name)
+    if entity == None:
+        raise NameDefException('Name "' + name + '" not exists.')
     return entity.definition
 
 def get_item_by_id(user, category, num_id):
-    entity = ndbi.read_entity(NameDef,
-                              ancestor = user,
-                              category = category,
-                              num_id = num_id)
+    entity = ndbi.read(NameDef,
+                       ancestor = user,
+                       category = category,
+                       num_id = num_id)
+    if entity == None:
+        raise NameDefException('Id "' + num_id + '" not exists.')
     return (entity.name, entity.definition)
 
 def get_random_items(user, category, count = 1):
@@ -63,12 +67,12 @@ def add_item(user, category, name, definition):
         raise NameDefException('duplicate write for ' + name)
 
     item_count = increase_counter(user, category)
-    ndbi.create_entity(NameDef,
-                       parent = user,
-                       category = category,
-                       num_id = item_count,
-                       name = name,
-                       definition = definition)
+    ndbi.create(NameDef,
+                parent = user,
+                category = category,
+                num_id = item_count,
+                name = name,
+                definition = definition)
 
 #####################################################################
 # page rendering

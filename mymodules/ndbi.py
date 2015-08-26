@@ -67,7 +67,7 @@ def read_entities(model, max_count, *args, **props):
 # CRUD operations
 #####################################################################
 
-def create_entity(model, **props):
+def create(model, **props):
     #if len(read_entities(model, 1, **props)) > 0:
     #    raise NDBIException(
     #        'Entity ' + str(model) + ' for ' + str(props) + ' exists.')
@@ -78,34 +78,28 @@ def create_entity(model, **props):
     entity = model(**props)
     entity.put()
 
-def read_entity(model, *args, **props):
+def read(model, *args, **props):
     result = read_entities(model, 1, *args, **props)
     if len(result) > 0:
         return result[0]
     else:
+        return None
+
+def update(entity, model, **props):
+    if props.has_key('ancestor'):
+        ancestor_key = props['ancestor']
+        props.pop('ancestor')
+        props['parent'] = ancestor_key
+    target = entity.key.get()
+    target.populate(**props)
+    target.put()
+
+def delete(model, **props):
+    target = read(model, **props)
+    if target == None:
         raise NDBIException(
-            'Entity ' + str(model) + ' for ' + str(props) + ' not found.')
-
-def update_entity(model, **props):
-    try:
-        result = read_entity(model, **props)
-        if len(result) > 0:
-            if props.has_key('ancestor'):
-                ancestor_key = props['ancestor']
-                props.pop('ancestor')
-                props['parent'] = ancestor_key
-            target = result.key.get()
-            target.populate(**props)
-            target.put()
-    except NDBIException as e:
-        raise NDBIException('Update error: ' + str(e))
-
-def delete_entity(model, **props):
-    try:
-        entity = read_entity(model, **props)
-        entity.key.delete()
-    except NDBIException as e:
-        raise NDBIException('Delete error: ' + str(e))
+            'Delete error: ' + type(model) + ' ' + props + ' not exists.')
+    target.key.delete()
 
 #####################################################################
 # unit test

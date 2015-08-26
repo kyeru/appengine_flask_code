@@ -14,26 +14,24 @@ class CounterException(Exception):
         return '[CounterException] ' + self.message
 
 def initiate_counter(user, name, overwrite = True):
-    try:
-        counter = ndbi.read_entity(
-            Counter, ancestor = user, name = name)
+    counter = ndbi.read(Counter, ancestor = user, name = name)
+    if counter == None:
+        ndbi.create(Counter, ancestor = user, name = name, count = 0)
+    else:
         if overwrite:
             counter.count = 0
             counter.put()
-    except ndbi.NDBIException:
-        ndbi.create_entity(Counter,
-                           ancestor = user,
-                           name = name,
-                           count = 0)
 
 def get_count(user, name):
-    counter = ndbi.read_entity(
-        Counter, ancestor = user, name = name)
+    counter = ndbi.read(Counter, ancestor = user, name = name)
+    if counter == None:
+        raise CounterException('Counter "' + name + '" not exists.')
     return counter.count
 
 def increase_counter(user, name):
-    counter = ndbi.read_entity(
-        Counter, ancestor = user, name = name)
+    counter = ndbi.read(Counter, ancestor = user, name = name)
+    if counter == None:
+        raise CounterException('Counter "' + name + '" not exists.')
     counter.count += 1
     counter.put()
     return counter.count

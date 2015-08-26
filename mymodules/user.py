@@ -14,12 +14,7 @@ def get_user_id():
         return None
 
 def user_exists(user_id):
-    try:
-        ndbi.read_entity(User,
-                         user_id = user_id)
-        return True
-    except ndbi.NDBIException:
-        return False
+    return ndbi.read(User, user_id = user_id) != None
 
 def add_user(user_id):
     user_key = User(user_id = user_id,
