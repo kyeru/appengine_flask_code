@@ -249,6 +249,12 @@ def evaluate_result(category):
 # file upload
 #####################################################################
 
+def create_category(user, category):
+    try:
+        ndbi.read_entity(Category, ancestor = user, name = category)
+    except ndbi.NDBIException:
+        ndbi.create_entity(Category, ancestor = user, name = category)
+
 def quiz_file_upload():
     return renderer.render_page('file_upload.html')
 
@@ -256,6 +262,7 @@ def quiz_file_upload_result():
     try:
         namedefs = parse_file(request.files['uploaded'])
         category = request.form['category']
+        create_category(current_user(), category)
         initiate_counter(current_user(), category, overwrite = False)
         store_count = 0
         ignore_count = 0
