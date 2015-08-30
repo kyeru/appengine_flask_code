@@ -7,29 +7,29 @@ h1 {
 p {
   font-size: 1.0em;
   font-family: sans-serif;
-  color: #0000aa;
+  color: #444444;
 }
 
 div {
   font-size: 1.0em;
   font-family: arial;
-  color: #999999;
+  color: #444444;
 }
 
 .header {
-  font-size: 1.1em;
+  font-size: 1.05em;
   color: #6666aa;
   background-color: #cccccc;
 }
 
 .footer {
-  font-size: 1.1em;
-  color: #6666aa;
-  background-color: #cccccc;
+  font-size: 1.05em;
+  color: #444444;
+  background-color: #eeeeee;
 }
 
 .nav {
-  font-size: 1.2em;
+  font-size: 1.1em;
   background-color: rgba(58, 128, 195, 0.72);
 }
 
@@ -40,11 +40,10 @@ div {
 
 a:link, a:visited {
   text-decoration: none;
-  color: #0000ff;
+  color: #2222cc;
 }
 
 a:hover {
   text-decoration: none;
-  color: #ff0000;
-  background-color: #eeeeee;
+  color: #2222ff;
 }
