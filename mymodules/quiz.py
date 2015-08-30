@@ -232,7 +232,7 @@ def evaluate_result(category):
                                     answer = qna.answer,
                                     choices = qna.choices,
                                     next_url = next_url,
-                                    grade_url = url_for('print_grade'))
+                                    grade_url = grade_url)
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_start')
 
