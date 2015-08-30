@@ -156,18 +156,18 @@ def parse_file(f):
 # page rendering
 #####################################################################
 
-common_categories = ['WordDef']
-
 def quiz_map():
-    your_categories = ndbi.read_entities(Category,
-                                         0,
-                                         ancestor = current_user())
-    user_categories = []
-    for c in your_categories:
-        user_categories.append(c.name)
+    commons = ndbi.read_entities(Category,
+                                 0,
+                                 ancestor = anonymous())
+    common_categories = [category.name for category in commons]
+    yours = ndbi.read_entities(Category,
+                               0,
+                               ancestor = current_user())
+    your_categories = [category.name for category in yours]
     return renderer.render_page('quiz_map.html',
                                 common_categories = common_categories,
-                                user_categories = user_categories)
+                                user_categories = your_categories)
 
 def common_quiz_map():
     return renderer.render_page('quiz_map.html',
