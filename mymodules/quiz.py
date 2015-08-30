@@ -32,7 +32,7 @@ class GradeRecord(ndb.Model):
 # exception
 #####################################################################
 
-class QuizException:
+class QuizException(Exception):
     def __init__(self, msg):
         self.message = msg
 
@@ -146,7 +146,7 @@ def parse_file(f):
     for entry in f.read().strip().split('\n'):
         line_num += 1
         word_def = entry.split('\t')
-        if len(word_def) < 2:
+        if len(word_def) != 2:
             raise QuizException(
                 'parse_file(): line %d invalid format' % line_num)
         word_defs.append((str(word_def[0]), str(word_def[1])))
