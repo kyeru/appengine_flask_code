@@ -152,26 +152,26 @@ def parse_file(f):
         word_defs.append((str(word_def[0]), str(word_def[1])))
     return word_defs
 
+def read_categories(user):
+    categories = ndbi.read_entities(Category,
+                                    0,
+                                    ancestor = user)
+    return [category.name for category in categories]
+
 #####################################################################
 # page rendering
 #####################################################################
 
 def quiz_map():
-    commons = ndbi.read_entities(Category,
-                                 0,
-                                 ancestor = anonymous())
-    common_categories = [category.name for category in commons]
-    yours = ndbi.read_entities(Category,
-                               0,
-                               ancestor = current_user())
-    your_categories = [category.name for category in yours]
+    common_categories = read_categories(anonymous())
+    your_categories = read_categories(current_user())
     return renderer.render_page('quiz_map.html',
                                 common_categories = common_categories,
                                 user_categories = your_categories)
 
 def common_quiz_map():
     return renderer.render_page('quiz_map.html',
-                                categories = common_categories)
+                                categories = read_categories(anonymous()))
 
 def user_defined_quiz_map():
     user_categories = ndbi.read_entities(Category,
@@ -194,7 +194,7 @@ def quiz_input(category):
                                      category = category,
                                      no = get_quiz_no()))
 
-        common = category in common_categories
+        common = category in read_categories(anonymous())
         user = anonymous() if common else current_user()
 
         content = get_random_items(user, category, 4)
