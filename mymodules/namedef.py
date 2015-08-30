@@ -60,19 +60,19 @@ def get_random_items(user, category, count = 1):
 def add_item(user, category, name, definition):
     try:
         get_def_by_name(user, category, name)
-    except ndbi.NDBIException:
+    except NameDefException:
         # OK, a new word. Move on.
-        pass
+        item_count = increase_counter(user, category)
+        ndbi.create(NameDef,
+                    ancestor = user,
+                    category = category,
+                    num_id = item_count,
+                    name = name,
+                    definition = definition)
+    except ndbi.NDBIException:
+        raise
     else:
         raise NameDefException('duplicate write for ' + name)
-
-    item_count = increase_counter(user, category)
-    ndbi.create(NameDef,
-                parent = user,
-                category = category,
-                num_id = item_count,
-                name = name,
-                definition = definition)
 
 #####################################################################
 # page rendering
