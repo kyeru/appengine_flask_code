@@ -3,6 +3,7 @@ import datetime
 
 from flask import Flask, request, session
 
+from mymodules import upload
 from mymodules import quiz
 from mymodules import renderer
 from mymodules import usersession
@@ -55,9 +56,9 @@ def logout():
 @app.route('/upload/', methods = ['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
-        return quiz.quiz_file_upload()
+        return upload.quiz_file_upload()
     else:
-        return quiz.quiz_file_upload_result()
+        return upload.quiz_file_upload_result()
 
 # quiz
 @app.route('/quiz/')
