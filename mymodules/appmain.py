@@ -3,6 +3,7 @@ import datetime
 
 from flask import Flask, request, session
 
+from mymodules import admin
 from mymodules import upload
 from mymodules import quiz
 from mymodules import renderer
@@ -71,11 +72,19 @@ def quiz_start(category = None):
             return quiz.quiz_input(category)
         else:
             return quiz.evaluate_result(category)
-
+# grade
 @app.route('/grade/')
 @app.route('/grade/<category>/')
 def print_grade(category = None):
     return quiz.check_grade(category)
+
+# admin
+@app.route('/admin/', methods = ['GET', 'POST'])
+def admin_start():
+    if request.method == 'GET':
+        return admin.admin_board()
+    else:
+        return admin.admin_action()
 
 # error handler
 @app.errorhandler(404)

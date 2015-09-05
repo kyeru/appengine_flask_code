@@ -98,8 +98,12 @@ def delete(model, **props):
     target = read(model, **props)
     if target == None:
         raise NDBIException(
-            'Delete error: ' + type(model) + ' ' + props + ' not exists.')
+            'Delete error: ' + str(model) + ' ' + str(props) + ' not exists.')
     target.key.delete()
+
+def delete_all(model, **props):
+    targets = read_entities(model, 0, **props)
+    ndb.delete_multi([target.key for target in targets])
 
 #####################################################################
 # unit test
@@ -114,10 +118,15 @@ class TestModel(ndb.Model):
 
 if __name__ == '__main__':
     user = TestUser(name = "test")
-    create_entity(TestModel, user, field1 = 1, field2 = "2")
-    result = read_entity(TestModel, user, field1 = 1)
+    create(TestModel, ancestor = user, field1 = 1, field2 = "2")
+    result = read(TestModel, ancestor = user, field1 = 1)
     assert(result.field2 == "2")
-    update_entity(TestModel, user, field1 = 1, field2 = "3")
-    result = read_entity(TestModel, user, field1 = 1)
+    update(TestModel, ancestor = user, field1 = 1, field2 = "3")
+    result = read(TestModel, ancestor = user, field1 = 1)
     assert(result.field2 == "3")
-    delete_entity(TestModel, user, field1 = 1)
+    delete(TestModel, ancestor = user, field1 = 1)
+    create(TestModel, ancestor = user, field1 = 2)
+    create(TestModel, ancestor = user, field1 = 3)
+    delete_all(TestModel, ancestor = user)
+    result = read_entities(TestModel, ancestor = user)
+    assert(len(result) == 0)
