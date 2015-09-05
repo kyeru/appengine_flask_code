@@ -7,8 +7,8 @@ from google.appengine.ext import ndb
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
-from mymodules.user import *
 from mymodules.namedef import *
+from mymodules.user import *
 
 #####################################################################
 # ndb schema
