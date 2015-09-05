@@ -99,8 +99,3 @@ def internal_server_error(e):
     return renderer.error_page(
         'Internal Server Error: ' + str(e), 'default')
     #return 'Internal Server Error: ' + str(e)
-
-# test
-@app.route('/random/')
-def read_random_item():
-    return namedef.random_item()

@@ -12,11 +12,6 @@
 	<div><input type="submit" name="submit" /></div>
 </form>
 
-<!--  <div style="float:left;clear:left;margin-right:10px;">file: </div>
-  <div style="float:left;"><input type="file" name="uploaded" /></div>
-  <div style="float:left;margin-right:10px;">category: </div>
-  <div style="float:left;margin-right:20px;"><input type="text" name="category" /></div>
--->
 {% with messages = get_flashed_messages() %}
 	{% for messasge in messages %}
 		<div><p>{{ message }}</p></div>

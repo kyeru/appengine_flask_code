@@ -72,17 +72,3 @@ def add_item(user, category, name, definition):
         raise
     else:
         raise NameDefException('duplicate write for ' + name)
-
-#####################################################################
-# page rendering
-#####################################################################
-
-def random_item():
-    try:
-        (name, definition) = get_random_items(1)[0]
-        return renderer.render_page('name_def.html',
-                                    name = name,
-                                    definition = definition)
-    except Exception as e:
-        return renderer.error_page('random_item(): ' + str(e),
-                                   'read_random_item')
