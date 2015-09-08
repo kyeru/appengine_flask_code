@@ -22,7 +22,12 @@
 <p>{{ debug_info }}</p>
 {% endif %}
 
-<div><a href="{{ next_url }}">next quiz</a></div>
-<div><a href="{{ grade_url }}">stop and print the result</a></div>
+{% if next_url %}
+<div>Go to <a href="{{ next_url }}">next question</a>.</div>
+{% endif %}
+
+{% if grade_url %}
+<div>This round is over. Check your <a href="{{ grade_url }}">grade</a>.</div>
+{% endif %}
 
 {% endblock %}

@@ -55,14 +55,24 @@ class QuestionAnswer:
         return self.answer == answer
 
 class QuizGenerator:
-    @staticmethod
-    def load(quiz_no):
-        record = ndbi.read(QnARecord,
-                           ancestor = current_user(),
-                           quiz_no = quiz_no)
-        if record == None:
-            raise QuizException('Record "' + quiz_no + '" not exists.')
-        return QuestionAnswer(record.choices, record.answer)
+    def __init__(self, qna, quiz_no):
+        self.qna = qna
+        self.quiz_no = quiz_no
+
+    def choice_type1(self):
+        try:
+            target, description = self.qna.choices[self.qna.answer - 1]
+            choices = []
+            for name, description in self.qna.choices:
+                choices.append(description)
+            ndbi.create(QnARecord,
+                        ancestor = current_user(),
+                        quiz_no = self.quiz_no,
+                        answer = self.qna.answer,
+                        choices = choices)
+            return target, choices
+        except Exception as e:
+            return QuizException('Quiz type 1 error: ' + str(e))
 
     @staticmethod
     def get_type1(qna, quiz_no):
@@ -104,22 +114,6 @@ class QuizGenerator:
                 'Quiz type 2 error: ' + str(qna) + '\n' +
                 str(type(e)) + ': ' + str(e))
 
-    @staticmethod
-    def delete(quiz_no):
-        ndbi.delete(QnARecord,
-                    ancestor = current_user(),
-                    quiz_no = quiz_no)
-
-    @staticmethod
-    def get_log(qna):
-        target, choices = question(qna)
-        log = str(target) + ' --> '
-        num = 1
-        for choice in choices:
-            log += str(num) + ') ' + choice + ' '
-            num += 1
-        return log
-
 def update_grade_record(category, is_correct):
     grade = ndbi.read(GradeRecord,
                       ancestor = current_user(),
@@ -137,7 +131,7 @@ def update_grade_record(category, is_correct):
         grade.correct_count += 1 if is_correct else 0
         grade.put()
 
-def get_quiz_no():
+def generate_quiz_no():
     return random.randint(1, 65535)
 
 def read_categories(user):
@@ -145,6 +139,17 @@ def read_categories(user):
                                     0,
                                     ancestor = user)
     return [category.name for category in categories]
+
+def pop_record(quiz_no):
+    record = ndbi.read(QnARecord,
+                       ancestor = current_user(),
+                       quiz_no = quiz_no)
+    if record == None:
+        raise QuizException('Record "' + quiz_no + '" not exists.')
+    ndbi.delete(QnARecord,
+                ancestor = current_user(),
+                quiz_no = quiz_no)
+    return QuestionAnswer(record.choices, record.answer)
 
 #####################################################################
 # page rendering
@@ -173,26 +178,24 @@ def user_defined_quiz_map():
 
 def quiz_input(category):
     try:
-        if not 'timestamp' in session:
+        if not 'quiz_no' in session:
             session['timestamp'] = time.time()
-
-        quiz_no = request.args.get('no')
-        if quiz_no == None:
+            session['quiz_no'] = 0
             return redirect(url_for('quiz_start',
                                      category = category,
-                                     no = get_quiz_no()))
+                                     no = session['quiz_no']))
+        else:
+            session['quiz_no'] = session['quiz_no'] + 1
 
+        quiz_no = session['quiz_no']
         common = category in read_categories(anonymous())
         user = anonymous() if common else current_user()
 
         content = get_random_items(user, category, 4)
         answer = random.randint(0, len(content) - 1) + 1
         qna = QuestionAnswer(content, answer)
-        #quiz_types = [QuizGenerator.get_type1,
-        #              QuizGenerator.get_type2]
-        #get_type = quiz_types[random.randint(0, 1)]
-        #target, choices = get_type(qna, int(quiz_no))
-        target, choices = QuizGenerator.get_type1(qna, int(quiz_no))
+        quiz_gen = QuizGenerator(qna, quiz_no)
+        target, choices = quiz_gen.choice_type1()
         numbered_choices = []
         for choice in choices:
             numbered_choices.append({'num': len(numbered_choices) + 1,
@@ -203,11 +206,12 @@ def quiz_input(category):
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_start')
 
+max_round = 3
+
 def evaluate_result(category):
     try:
-        quiz_no = int(request.args.get('no', ''))
-        qna = QuizGenerator.load(quiz_no)
-        QuizGenerator.delete(quiz_no)
+        quiz_no = session['quiz_no']
+        qna = pop_record(quiz_no)
 
         user_answer = request.form['choice']
         is_correct = qna.evaluate(int(user_answer))
@@ -215,18 +219,24 @@ def evaluate_result(category):
             update_grade_record(category, is_correct)
         next_url = url_for('quiz_start', category = category)
         grade_url = url_for('print_grade', category = category)
-        return renderer.render_page('quiz_result.html',
-                                    result = is_correct,
-                                    answer = qna.answer,
-                                    choices = qna.choices,
-                                    next_url = next_url,
-                                    grade_url = grade_url)
+        if quiz_no < max_round:
+            return renderer.render_page('quiz_result.html',
+                                        result = is_correct,
+                                        answer = qna.answer,
+                                        choices = qna.choices,
+                                        next_url = next_url)
+        else:
+            #del session['quiz_no']
+            session.pop('quiz_no')
+            return renderer.render_page('quiz_result.html',
+                                        result = is_correct,
+                                        answer = qna.answer,
+                                        choices = qna.choices,
+                                        grade_url = grade_url)
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_start')
 
 def check_grade(category):
-    if 'timestamp' in session:
-        del session['timestamp']
     categories = []
     if category == None:
         categories = ndbi.read_entities(Category, 0)
