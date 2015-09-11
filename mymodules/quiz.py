@@ -219,7 +219,7 @@ def evaluate_result(category):
             update_grade_record(category, is_correct)
         next_url = url_for('quiz_start', category = category)
         grade_url = url_for('print_grade', category = category)
-        if quiz_no <= max_round:
+        if quiz_no < max_round:
             return renderer.render_page('quiz_result.html',
                                         result = is_correct,
                                         answer = qna.answer,
