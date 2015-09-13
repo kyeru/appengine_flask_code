@@ -3,17 +3,25 @@
 {% block content %}
 
 {% if result == True %}
-<p>Number {{ answer}} is correct.</p>
+<p>Number {{ your_answer }} is <em>correct</em>.</p>
 <ol>
 {% for choice in choices %}
-  <li>{{ choice }}</li>
+	{% if choice.num == correct_answer %}
+	<li><b><font color="red">{{ choice.text }}</font></b></li>
+	{% else %}
+	<li>{{ choice.text }}</li>
+	{% endif %}
 {% endfor %}
 </ol>
 {% else %}
-<p>Incorrect. The right answer is {{ answer }}.</p>
+<p>You choose {{ your_answer }}, but it is <em>incorrect</em>. The right answer is {{ correct_answer }}.</p>
 <ol>
 {% for choice in choices %}
-  <li>{{ choice }}</li>
+  	{% if choice.num == correct_answer %}
+	<li><b><font color="red">{{ choice.text }}</font></b></li>
+	{% else %}
+	<li>{{ choice.text }}</li>
+	{% endif %}
 {% endfor %}
 </ol>
 {% endif %}

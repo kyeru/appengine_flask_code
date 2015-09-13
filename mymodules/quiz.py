@@ -44,15 +44,16 @@ class QuizException(Exception):
 #####################################################################
 
 class QuestionAnswer:
-    def __init__(self, choices, answer):
-        self.choices = choices
-        self.answer = answer
+    # def __init__(self, choices, answer):
+    #     self.choices = choices
+    #     self.answer = answer
+
+    def __init__(self, user, category):
+        self.choices = content = get_random_items(user, category, 4)
+        self.answer = random.randint(0, len(content) - 1) + 1
 
     def __str__(self):
         return str(self.choices) + ' (' + str(self.answer) + ')'
-
-    def evaluate(self, answer):
-        return self.answer == answer
 
 class QuizGenerator:
     def __init__(self, qna, quiz_no):
@@ -73,46 +74,6 @@ class QuizGenerator:
             return target, choices
         except Exception as e:
             return QuizException('Quiz type 1 error: ' + str(e))
-
-    @staticmethod
-    def get_type1(qna, quiz_no):
-        if len(qna.choices) <= 0:
-            return '', []
-        try:
-            target, description = qna.choices[qna.answer - 1]
-            choices = []
-            for name, description in qna.choices:
-                choices.append(description)
-            ndbi.create(QnARecord,
-                        ancestor = current_user(),
-                        quiz_no = quiz_no,
-                        answer = qna.answer,
-                        choices = choices)
-            return target, choices
-        except Exception as e:
-            raise QuizException(
-                'Quiz type 1 error: ' + str(qna) + '\n' +
-                str(type(e)) + ': ' + str(e))
-
-    @staticmethod
-    def get_type2(qna, quiz_no):
-        if len(qna.choices) <= 0:
-            return '', []
-        try:
-            name, target = qna.choices[qna.answer - 1]
-            choices = []
-            for name, description in qna.choices:
-                choices.append(name)
-            ndbi.create(QnARecord,
-                        ancestor = current_user(),
-                        quiz_no = quiz_no,
-                        answer = qna.answer,
-                        choices = choices)
-            return target, choices
-        except Exception as e:
-            raise QuizException(
-                'Quiz type 2 error: ' + str(qna) + '\n' +
-                str(type(e)) + ': ' + str(e))
 
 def update_grade_record(category, is_correct):
     grade = ndbi.read(GradeRecord,
@@ -149,7 +110,7 @@ def pop_record(quiz_no):
     ndbi.delete(QnARecord,
                 ancestor = current_user(),
                 quiz_no = quiz_no)
-    return QuestionAnswer(record.choices, record.answer)
+    return record.choices, record.answer
 
 #####################################################################
 # page rendering
@@ -190,10 +151,11 @@ def quiz_input(category):
         quiz_no = session['quiz_no']
         common = category in read_categories(anonymous())
         user = anonymous() if common else current_user()
+        qna = QuestionAnswer(user, category)
 
-        content = get_random_items(user, category, 4)
-        answer = random.randint(0, len(content) - 1) + 1
-        qna = QuestionAnswer(content, answer)
+        # content = get_random_items(user, category, 4)
+        # answer = random.randint(0, len(content) - 1) + 1
+        # qna = QuestionAnswer(content, answer)
         quiz_gen = QuizGenerator(qna, quiz_no)
         target, choices = quiz_gen.choice_type1()
         numbered_choices = []
@@ -211,27 +173,32 @@ max_round = 5
 def evaluate_result(category):
     try:
         quiz_no = session['quiz_no']
-        qna = pop_record(quiz_no)
+        choices, correct_answer = pop_record(quiz_no)
 
-        user_answer = request.form['choice']
-        is_correct = qna.evaluate(int(user_answer))
+        user_answer = int(request.form['choice'])
+        is_correct = (correct_answer == user_answer)
         if get_user_id() != None:
             update_grade_record(category, is_correct)
         next_url = url_for('quiz_start', category = category)
         grade_url = url_for('print_grade', category = category)
+        numbered_choices = []
+        for c in choices:
+            numbered_choices.append({'num': len(numbered_choices) + 1,
+                                     'text': c})
         if quiz_no < max_round:
             return renderer.render_page('quiz_result.html',
                                         result = is_correct,
-                                        answer = qna.answer,
-                                        choices = qna.choices,
+                                        your_answer = user_answer,
+                                        correct_answer = correct_answer,
+                                        choices = numbered_choices,
                                         next_url = next_url)
         else:
-            #del session['quiz_no']
             session.pop('quiz_no')
             return renderer.render_page('quiz_result.html',
                                         result = is_correct,
-                                        answer = qna.answer,
-                                        choices = qna.choices,
+                                        your_answer = user_answer,
+                                        correct_answer = correct_answer,
+                                        choices = numbered_choices,
                                         grade_url = grade_url)
     except Exception as e:
         return renderer.error_page(str(e), 'quiz_start')
@@ -263,11 +230,10 @@ def check_grade(category):
 #####################################################################
 
 if __name__ == '__main__':
-    sample = [('a', 'description of a'),
-              ('b', 'description of b'),
-              ('c', 'description of c'),
-              ('d', 'description of d')]
-    qna = QuestionAnswer(sample)
-    print 'correct answer: ' + str(qna.answer)
-    print qna.evaluate(qna.answer)
-    print qna.evaluate(5 - qna.answer)
+    pass
+    # sample = [('a', 'description of a'),
+    #           ('b', 'description of b'),
+    #           ('c', 'description of c'),
+    #           ('d', 'description of d')]
+    # qna = QuestionAnswer(sample)
+    # print 'correct answer: ' + str(qna.answer)
