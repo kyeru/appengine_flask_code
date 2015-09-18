@@ -27,7 +27,7 @@ def parse_file(f):
     line_num = 0
     for entry in f.read().strip().split('\n'):
         line_num += 1
-        word_def = entry.split('\t')
+        word_def = entry.decode('euc-kr').encode('utf8').split('\t')
         if len(word_def) != 2:
             raise UploadException(
                 'parse_file(): line %d invalid format' % line_num)
