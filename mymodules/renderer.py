@@ -1,12 +1,9 @@
 from flask import url_for, render_template, session
 from mymodules.user import *
 
-def style_url():
-    return url_for('static', filename = 'style.css')
 
 def render_page(template, **args):
     return render_template(template,
-                           style_url = style_url(),
                            user_id = get_user_id(),
                            **args)
 

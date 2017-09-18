@@ -1,13 +1,30 @@
-{% extends "base.html" %}
+<head>
 
-{% block content %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <title>Login</title>
 
-<form method="post" enctype="multipart/form-data">
-  <div style="float:left;clear:left;margin-right:10px;">ID: </div>
-  <div style="float:left;margin-right:10px;"><input type="text" name="user_id" /></div>
-  <div style="float:left"><input type="submit" name="submit" /></div>
+</head>
+
+<body>
+
+<form method="post">
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+    <input type="text" class="form-control" name="user_id" placeholder="Input your id">
+    <div class="input-group-btn">
+      <button type="submit" class="btn btn-default">
+        <i class="glyphicon glyphicon-ok"></i>
+      </button>
+    </div>
+  </div>
 </form>
 
-{% endblock %}
+</body>
+
+</html>

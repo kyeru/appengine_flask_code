@@ -5,10 +5,30 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% if style_url %}
-<link rel="stylesheet" type="text/css" href="{{ style_url }}">
-{% endif %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+/*
+$(document).ready(function() {
+  $("#tab_quiz").click(function() {
+    // $("#tab-quiz, #tab-grade, #tab-upload, #tab-about").removeClass("active");
+    $("#tab_quiz").addClass("active");
+  });
+  $("#tab_grade").click(function() {
+    $("#tab_grade").addClass("active");
+  });
+  $("#tab_upload").click(function() {
+    $("#tab_upload").addClass("active");
+  });
+  $("#tab_about").click(function() {
+    $("#tab_about").addClass("active");
+  });
+});*/
+</script>
 
 {% block script %}
 {% endblock %}
@@ -17,25 +37,16 @@
 
 <body>
 
-<div class="login">
-  {% if not user_id %}
-  <a href="/login">login</a>
-  {% else %}
-  <a href="/logout">logout</a>
-  {% endif %}
-</div>
-<div class="nav">
-  <ul class="hlist">
-    <li><a href="/quiz"><b>quiz</b></a></li>
-    {% if user_id %}
-    <li><a href="/grade"><b>grade</b></a></li>
-    {% endif %}
-    <!-- <li><a href="/random"><b>random</b></a></li> -->
-    <li><a href="/upload"><b>upload</b></a></li>
-    <li><a href="/about"><b>about</b></a></li>
-  </ul>
-</div>
-
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li {% if request.path == "/quiz/" %}class="active"{% endif %}><a href="/quiz">Quiz</a></li>
+      <li {% if request.path == "/grade/" %}class="active"{% endif %}><a href="/grade">Grade</a></li>
+      <li {% if request.path == "/upload/" %}class="active"{% endif %}><a href="/upload">Upload</a></li>
+      <li {% if request.path == "/about/" %}class="active"{% endif %}><a href="/about">About</a></li>
+    </ul>
+  </div>
+</nav>
 
 {% block content %}
 {% endblock %}
@@ -52,8 +63,10 @@
 
 <br/>
 
-{% if user_id %}
-<div class="footer">{{ user_id }} logged in</div>
+{% if not user_id %}
+<h4><a href="/login"><span class="label label-default">Login</span></a></h4>
+{% else %}
+<h4>User {{ user_id }} logged in. <a href="/logout"><span class="label label-success"> Logout</a></h4>
 {% endif %}
 
 </body>
