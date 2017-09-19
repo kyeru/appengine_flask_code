@@ -2,17 +2,8 @@
 
 {% block content %}
 
-{% for category in categories %}
-
-<div><a href="{{ category }}">{{ category }}</a></div>
-
-{% endfor %}
-
 <p>Categories:</p>
-{% for category in user_categories %}
-<div><a href="{{ category }}">{{ category }}</a></div>
-{% endfor %}
-{% for category in common_categories %}
+{% for category in categories %}
 <div><a href="{{ category }}">{{ category }}</a></div>
 {% endfor %}
 
