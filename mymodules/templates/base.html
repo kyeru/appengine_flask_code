@@ -11,24 +11,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<script>
-/*
-$(document).ready(function() {
-  $("#tab_quiz").click(function() {
-    // $("#tab-quiz, #tab-grade, #tab-upload, #tab-about").removeClass("active");
-    $("#tab_quiz").addClass("active");
-  });
-  $("#tab_grade").click(function() {
-    $("#tab_grade").addClass("active");
-  });
-  $("#tab_upload").click(function() {
-    $("#tab_upload").addClass("active");
-  });
-  $("#tab_about").click(function() {
-    $("#tab_about").addClass("active");
-  });
-});*/
-</script>
+<style>
+.container {
+  margin: 10px 10px 10px 10px;
+}
+</style>
 
 {% block script %}
 {% endblock %}
@@ -36,6 +23,8 @@ $(document).ready(function() {
 </head>
 
 <body>
+
+<div>
 
 <nav class="navbar navbar-default">
   <div class="container-fluid">
@@ -47,6 +36,8 @@ $(document).ready(function() {
     </ul>
   </div>
 </nav>
+
+<section class="container">
 
 {% block content %}
 {% endblock %}
@@ -63,11 +54,17 @@ $(document).ready(function() {
 
 <br/>
 
+</section>
+
+<footer class="container">
 {% if not user_id %}
 <h4><a href="/login"><span class="label label-default">Login</span></a></h4>
 {% else %}
 <h4>User {{ user_id }} logged in. <a href="/logout"><span class="label label-success"> Logout</a></h4>
 {% endif %}
+</footer>
+
+</div>
 
 </body>
 
