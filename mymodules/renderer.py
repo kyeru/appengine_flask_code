@@ -13,7 +13,7 @@ def default_page():
 def error_page(message, return_to, **args):
     return render_page('error.html',
                        message = message,
-                       next_url = url_for(return_to, **args))
+                       next_url = '/')
 
 def under_construction():
     return render_page('error.html',

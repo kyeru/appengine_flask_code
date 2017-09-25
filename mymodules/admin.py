@@ -5,7 +5,7 @@ from mymodules import renderer
 from mymodules.counter import Counter
 from mymodules.namedef import NameDef
 from mymodules.user import get_user_key
-from mymodules.quiz import QnARecord
+
 
 #####################################################################
 # class and functions
@@ -20,12 +20,12 @@ def delete_quiz_material(user, category):
 					category = category)
 	flash('Category ' + category + ' of user ' + user + ' deleted')
 
-def delete_garbage_record(user):
-	try:
-		ndbi.delete(QnARecord,
-					ancestor = get_user_key(user))
-	except ndbi.NDBIException as e:
-		return
+# def delete_garbage_record(user):
+# 	try:
+# 		ndbi.delete(QnARecord,
+# 					ancestor = get_user_key(user))
+# 	except ndbi.NDBIException as e:
+# 		return
 
 #####################################################################
 # page rendering

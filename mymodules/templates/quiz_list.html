@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>Choose a category</p>
+<ul>
+  {% for category in categories %}
+  <li><a href="{{ category }}">{{ category }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

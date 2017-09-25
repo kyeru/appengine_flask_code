@@ -49,7 +49,7 @@ def get_item_by_id(user, category, num_id):
         raise NameDefException('Id "' + num_id + '" not exists.')
     return (entity.name, entity.definition)
 
-def get_random_items(user, category, count = 1):
+def get_random_items(user, category, count):
     total_item_count = get_count(user, category)
     if count >= total_item_count:
         raise NameDefException('not enough records stored')
