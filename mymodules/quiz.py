@@ -92,8 +92,9 @@ def read_categories(user):
 
 
 def quiz_list():
-    categories = read_categories(current_user())
-    categories.append(read_categories(anonymous()))
+    c1 = set(read_categories(current_user()))
+    c2 = set(read_categories(anonymous()))
+    categories = c1.union(c2)
     return renderer.render_page('quiz_list.html',
                                 categories = categories)
 
