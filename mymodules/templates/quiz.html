@@ -3,7 +3,9 @@
 {% block content %}
 
 {% if target %}
-<p>Question: {{ target }}</p>
+<p>Question {{ question_number }} / {{ total_count }}</p>
+<br/>
+<p>{{ target }}</p>
 <div>
   <form method="post">
     <div>
@@ -17,7 +19,7 @@
   </form>
 </div>
 {% else %}
-<p>question is not given</p>
+<p>Question is not given.</p>
 {% endif %}
 
 {% endblock %}

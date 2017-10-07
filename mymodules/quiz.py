@@ -90,6 +90,7 @@ def read_categories(user):
 # Quiz
 #
 
+max_round = 5
 
 def quiz_list():
     c1 = set(read_categories(current_user()))
@@ -124,14 +125,14 @@ def show_question(category):
         
         return renderer.render_page('quiz.html',
                                     target = target,
+                                    question_number = round_num,
+                                    total_count = max_round,
                                     choices = numbered_choices)
     except Exception as e:
         return renderer.error_page(str(e), 'run_quiz')
 
 
 def evaluate_result(category):
-    max_round = 5
-
     try:
         round_num = session['round_num']
         correct_answer = session['answer']
