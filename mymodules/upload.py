@@ -2,7 +2,6 @@ from flask import request
 
 from mymodules import ndbi
 from mymodules import renderer
-from mymodules.counter import *
 from mymodules.item import *
 from mymodules.quiz import Category
 from mymodules.user import *

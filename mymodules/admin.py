@@ -2,8 +2,7 @@ from flask import flash, request
 
 from mymodules import ndbi
 from mymodules import renderer
-from mymodules.counter import Counter
-from mymodules.namedef import Item
+from mymodules.item import Item
 from mymodules.user import get_user_key
 
 

@@ -4,7 +4,6 @@ from flask import flash, redirect, request, session, url_for
 from google.appengine.ext import ndb
 
 from mymodules import renderer
-from mymodules.counter import *
 from mymodules.user import *
 
 class LoginException(Exception):
