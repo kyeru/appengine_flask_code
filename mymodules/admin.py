@@ -3,7 +3,7 @@ from flask import flash, request
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import Counter
-from mymodules.namedef import NameDef
+from mymodules.namedef import Item
 from mymodules.user import get_user_key
 
 
@@ -15,7 +15,7 @@ def delete_quiz_material(user, category):
 	ndbi.delete(Counter,
 				ancestor = get_user_key(user),
 				name = category)
-	ndbi.delete_all(NameDef,
+	ndbi.delete_all(Item,
 					ancestor = get_user_key(user),
 					category = category)
 	flash('Category ' + category + ' of user ' + user + ' deleted')

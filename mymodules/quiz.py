@@ -17,10 +17,6 @@ from mymodules.user import *
 #
 
 
-class Category(ndb.Model):
-    name = ndb.StringProperty()
-
-
 class Scores(ndb.Model):
     category = ndb.StringProperty()
     timestamp = ndb.FloatProperty()
@@ -29,20 +25,7 @@ class Scores(ndb.Model):
 
 
 #
-# exception
-#
-
-
-class QuizException(Exception):
-    def __init__(self, msg):
-        self.message = msg
-
-    def __str__(self):
-        return '[QuizException] ' + self.message
-
-
-#
-# classes and functions
+# helpers
 #
 
 
@@ -58,28 +41,7 @@ class QuestionMaker:
         return self.answer, self.choices
 
 
-# class QuizGenerator:
-#     def __init__(self, qna, quiz_no):
-#         self.qna = qna
-#         self.quiz_no = quiz_no
-
-#     def choice_type1(self):
-#         try:
-#             target, description = self.qna.choices[self.qna.answer - 1]
-#             choices = []
-#             for name, description in self.qna.choices:
-#                 choices.append(description)
-#             ndbi.create(QnARecord,
-#                         ancestor = current_user(),
-#                         quiz_no = self.quiz_no,
-#                         answer = self.qna.answer,
-#                         choices = choices)
-#             return target, choices
-#         except Exception as e:
-#             return QuizException('Quiz type 1 error: ' + str(e))
-
-
-def read_categories(user):
+def get_categories(user):
     categories = ndbi.read_entities(Category,
                                     0,
                                     ancestor = user)
@@ -87,14 +49,16 @@ def read_categories(user):
 
 
 #
-# Quiz
+# quiz
 #
+
 
 max_round = 5
 
+
 def quiz_list():
-    c1 = set(read_categories(current_user()))
-    c2 = set(read_categories(anonymous()))
+    c1 = set(get_categories(current_user()))
+    c2 = set(get_categories(anonymous()))
     categories = c1.union(c2)
     return renderer.render_page('quiz_list.html',
                                 categories = categories)
@@ -176,31 +140,35 @@ def evaluate_result(category):
 
 
 #
-# Score
+# score
 #
 
-def show_scores(category):
-    categories = []
-    if category == None:
-        categories = ndbi.read_entities(Category, 0)
-        categories = [c.name for c in categories]
-    else:
-        categories.append(category)
 
-    all_histories = []
-    for c in categories:
-        score_history = ndbi.read_entities(
-            Scores,
-            20,
-            sort = 'timestamp',
-            ancestor = current_user(),
-            category = c)
-        score_history.reverse()
-        numbered_history = [(i + 1, score_history[i])
-            for i in range(len(score_history))]
-        all_histories.append((c, numbered_history))
-    return renderer.render_page('scores.html',
-                                all_histories = all_histories)
+def show_scores(category):
+    try:
+        categories = []
+        if category == None:
+            categories = ndbi.read_entities(Category, 0)
+            categories = [c.name for c in categories]
+        else:
+            categories.append(category)
+
+        all_histories = []
+        for c in categories:
+            score_history = ndbi.read_entities(
+                Scores,
+                20,
+                sort = 'timestamp',
+                ancestor = current_user(),
+                category = c)
+            score_history.reverse()
+            numbered_history = [(i + 1, score_history[i])
+                for i in range(len(score_history))]
+            all_histories.append((c, numbered_history))
+        return renderer.render_page('scores.html',
+                                    all_histories = all_histories)
+    except Exception as e:
+        return renderer.error_page(str(e), 'default')
 
 
 #

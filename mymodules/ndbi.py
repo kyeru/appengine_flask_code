@@ -1,11 +1,13 @@
 from google.appengine.ext import ndb
 
+
 class NDBIException(Exception):
     def __init__(self, message):
         self.message = message
         
     def __str__(self):
         return '[NDBIException] ' + self.message
+
 
 def make_ndb_filter(model, props):
     if len(props) == 0:
@@ -20,12 +22,11 @@ def make_ndb_filter(model, props):
         return ndb.AND(attribute == value,
                        make_ndb_filter(model, dict(prop_list[1:])))
 
-def read_entities(model, max_count, *args, **props):
-    query = type(model).__getattribute__(model, 'query')
 
-    ancestor_key = None
+def read_entities(model, max_count, *args, **props):
+    parent = None
     if props.has_key('ancestor'):
-        ancestor_key = props['ancestor']
+        parent = props['ancestor']
         props.pop('ancestor')
     sort = None
     if props.has_key('sort'):
@@ -39,21 +40,19 @@ def read_entities(model, max_count, *args, **props):
     if len(props) > 0:
         ndb_filter = make_ndb_filter(model, dict(props))
 
-    entities = list()
     bound_query = None
     if ndb_filter != None:
-        if ancestor_key != None:
-            bound_query = query(ndb_filter,
-                                *args,
-                                ancestor = ancestor_key)
+        if parent != None:
+            bound_query = model.query(ndb_filter,
+                                      *args,
+                                      ancestor = parent)
         else:
-            bound_query = query(ndb_filter, *args)
+            bound_query = model.query(ndb_filter, *args)
     else:
-        if ancestor_key != None:
-            bound_query = query(*args,
-                                ancestor = ancestor_key)
+        if parent != None:
+            bound_query = model.query(*args, ancestor = parent)
         else:
-            bound_query = query(*args)
+            bound_query = model.query(*args)
 
     if sort != None:
         sort_target = type(model).__getattribute__(model, sort)
@@ -63,20 +62,23 @@ def read_entities(model, max_count, *args, **props):
     entities = list(bound_query.iter())
     return entities[:max_count] if max_count > 0 else entities
 
-#####################################################################
+
+#
 # CRUD operations
-#####################################################################
+#
+
 
 def create(model, **props):
     #if len(read_entities(model, 1, **props)) > 0:
     #    raise NDBIException(
     #        'Entity ' + str(model) + ' for ' + str(props) + ' exists.')
     if props.has_key('ancestor'):
-        ancestor_key = props['ancestor']
+        parent = props['ancestor']
         props.pop('ancestor')
-        props['parent'] = ancestor_key
+        props['parent'] = parent
     entity = model(**props)
     entity.put()
+
 
 def read(model, *args, **props):
     result = read_entities(model, 1, *args, **props)
@@ -85,14 +87,16 @@ def read(model, *args, **props):
     else:
         return None
 
+
 def update(entity, model, **props):
     if props.has_key('ancestor'):
-        ancestor_key = props['ancestor']
+        parent = props['ancestor']
         props.pop('ancestor')
-        props['parent'] = ancestor_key
+        props['parent'] = parent
     target = entity.key.get()
     target.populate(**props)
     target.put()
+
 
 def delete(model, **props):
     target = read(model, **props)
@@ -101,20 +105,25 @@ def delete(model, **props):
             'Delete error: ' + str(model) + ' ' + str(props) + ' not exists.')
     target.key.delete()
 
+
 def delete_all(model, **props):
     targets = read_entities(model, 0, **props)
     ndb.delete_multi([target.key for target in targets])
 
-#####################################################################
+
+#
 # unit test
-#####################################################################
+#
+
 
 class TestUser(ndb.Model):
     name = ndb.StringProperty()
 
+
 class TestModel(ndb.Model):
     field1 = ndb.IntegerProperty()
     field2 = ndb.StringProperty()
+
 
 if __name__ == '__main__':
     user = TestUser(name = "test")

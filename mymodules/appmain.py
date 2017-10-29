@@ -17,16 +17,17 @@ app.secret_key = urandom(24)
 app.permanent_session_lifetime = datetime.timedelta(hours = 1)
 cgitb.enable(format="html")
 
+
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
 
 
-class AppException(Exception):
-    def __init__(self, msg):
-        self.message = msg
+# class AppException(Exception):
+#     def __init__(self, msg):
+#         self.message = msg
     
-    def __str__(self):
-        return '[AppException] ' + self.message
+#     def __str__(self):
+#         return '[AppException] ' + self.message
 
 
 def clear_quiz_session():
