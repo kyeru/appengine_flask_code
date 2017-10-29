@@ -3,7 +3,7 @@ from flask import request
 from mymodules import ndbi
 from mymodules import renderer
 from mymodules.counter import *
-from mymodules.namedef import *
+from mymodules.item import *
 from mymodules.quiz import Category
 from mymodules.user import *
 
@@ -46,12 +46,12 @@ def quiz_file_upload():
 
 def quiz_file_upload_result():
     try:
-        namedefs = parse_file(request.files['uploaded'])
+        items = parse_file(request.files['uploaded'])
         category = request.form['category']
         create_category(current_user(), category)
         store_count = 0
         ignore_count = 0
-        for (name, definition) in namedefs:
+        for (name, definition) in items:
             try:
                 add_item(current_user(), category, name, definition)
                 store_count += 1
