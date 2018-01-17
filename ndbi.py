@@ -138,4 +138,4 @@ if __name__ == '__main__':
     create(TestModel, ancestor = user, field1 = 3)
     delete_all(TestModel, ancestor = user)
     result = read_entities(TestModel, ancestor = user)
-    assert(len(result) == 0)
+    assert(len(result) == 0)    
